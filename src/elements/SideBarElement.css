@@ -1,4 +1,5 @@
 side-bar-element {
+  z-index: 100;
   display: flex;
   flex-direction: column;
   background: var(--background-1);
@@ -21,7 +22,6 @@ side-bar-element {
     backdrop-filter: blur(8px);
   }
   @media (max-width: 560px) {
-    z-index: 100;
     position: absolute;
     top: 0;
     left: 0;

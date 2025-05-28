@@ -26,7 +26,6 @@
 }
 
 #root {
-  color: var(--foreground);
   background-color: var(--background);
   display: flex;
   height: 100vh;
@@ -35,6 +34,7 @@
   &:not([maximized]) {
     border-radius: 14px;
     &::after {
+      z-index: 1000;
       content: "";
       pointer-events: none;
       position: absolute;
@@ -60,6 +60,8 @@
   background: none;
   border: none;
   box-sizing: border-box;
+  color: var(--foreground);
+  font-family: inherit;
   margin: 0;
   padding: 0;
 }

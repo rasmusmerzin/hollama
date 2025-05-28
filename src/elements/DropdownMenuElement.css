@@ -1,0 +1,51 @@
+dropdown-menu-element {
+  z-index: 1000;
+  position: fixed;
+  width: 0;
+  height: 0;
+  &::before {
+    z-index: 1;
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    left: 50%;
+    top: calc(100% + 4px);
+    transform: translateX(-50%) rotate(45deg);
+    width: 16px;
+    height: 16px;
+    background: var(--background-2);
+  }
+  > .shadow {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #0000;
+  }
+  > .container {
+    position: absolute;
+    z-index: 1;
+    left: 50%;
+    top: calc(100% + 8px);
+    transform: translateX(-50%);
+    width: 200px;
+    border-radius: 12px;
+    background: var(--background-2);
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    > div {
+      height: 1px;
+      background: var(--foreground);
+      margin: 4px 0;
+      opacity: 0.5;
+    }
+    > button {
+      padding: 8px;
+      text-align: left;
+      background: var(--background-2);
+      border-radius: 8px;
+    }
+  }
+}
