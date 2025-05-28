@@ -1,12 +1,12 @@
 title-bar-element {
   display: flex;
   height: 40px;
-  background: #f0f0f0;
   align-items: center;
   padding: 4px;
   cursor: default;
   .left {
     flex: 1;
+    display: flex;
   }
   .right {
     flex: 1;
@@ -20,9 +20,9 @@ title-bar-element {
     justify-content: center;
     align-items: center;
     border-radius: 8px;
-    background: #f0f0f0;
+    background: var(--background);
     &.active {
-      background: #ccc;
+      background: var(--background-1);
     }
     &.circle {
       border-radius: 100%;
