@@ -1,0 +1,36 @@
+title-bar-element {
+  display: flex;
+  height: 40px;
+  background: #f0f0f0;
+  align-items: center;
+  padding: 4px;
+  cursor: default;
+  .left {
+    flex: 1;
+  }
+  .right {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+  }
+  button {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+    background: #f0f0f0;
+    &.active {
+      background: #ccc;
+    }
+    &.circle {
+      border-radius: 100%;
+      transform: scale(0.75);
+    }
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}

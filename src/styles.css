@@ -11,3 +11,24 @@
   color: #060606;
   background-color: #f0f0f0;
 }
+
+* {
+  background: none;
+  border: none;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+svg {
+  width: 24px;
+  height: 24px;
+}
+
+button:not(:disabled) {
+  cursor: pointer;
+  transition: filter 200ms;
+  &:hover {
+    filter: brightness(0.9);
+  }
+}

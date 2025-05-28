@@ -13,6 +13,7 @@
     "withGlobalTauri": true,
     "windows": [
       {
+        "decorations": false,
         "title": "Hollama",
         "width": 800,
         "height": 600,

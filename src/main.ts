@@ -1,12 +1,7 @@
 import "./styles.css";
 import "@merzin/element";
+import { TitleBarElement } from "./TitleBarElement";
 
-const app = document.getElementById("app")!;
+const titleBar = new TitleBarElement();
 
-let counter = 0;
-const button = createElement("button", {
-  innerText: `Counter: ${counter}`,
-  onclick: () => (button.innerText = `Counter: ${++counter}`),
-});
-
-app.append(button);
+document.body.append(titleBar);
