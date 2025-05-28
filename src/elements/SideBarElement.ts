@@ -2,18 +2,24 @@ import "./SideBarElement.css";
 import { ICON_MENU, ICON_SEARCH } from "../icons";
 import { Subject } from "../Subject";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { ondoubleclick } from "../ondoubleclick";
 
-export const SideBarSubject = new Subject<{ open: boolean }>({ open: true });
+const SIDE_BAR_BREAKPOINT = 560;
+
+export const SideBarSubject = new Subject<{ open: boolean }>({
+  open: innerWidth >= SIDE_BAR_BREAKPOINT,
+});
 
 @tag("side-bar-element")
 export class SideBarElement extends HTMLElement {
   private appWindow = getCurrentWindow();
+  private titleElement: HTMLDivElement;
   private control?: AbortController;
 
   constructor() {
     super();
     this.replaceChildren(
-      createElement(
+      (this.titleElement = createElement(
         "div",
         {
           className: "title",
@@ -34,7 +40,7 @@ export class SideBarElement extends HTMLElement {
             }),
           ]),
         ],
-      ),
+      )),
       createElement("div", {
         className: "shadow",
         onclick: () =>
@@ -53,12 +59,20 @@ export class SideBarElement extends HTMLElement {
     addEventListener(
       "resize",
       () => {
-        if (innerWidth < 560 && SideBarSubject.current().open)
+        if (innerWidth < SIDE_BAR_BREAKPOINT && SideBarSubject.current().open)
           SideBarSubject.update((state) => ({ ...state, open: false }));
-        else if (innerWidth >= 560 && !SideBarSubject.current().open)
+        else if (
+          innerWidth >= SIDE_BAR_BREAKPOINT &&
+          !SideBarSubject.current().open
+        )
           SideBarSubject.update((state) => ({ ...state, open: true }));
       },
       this.control,
+    );
+    ondoubleclick(
+      this.titleElement,
+      () => this.appWindow.toggleMaximize(),
+      this.control.signal,
     );
   }
 

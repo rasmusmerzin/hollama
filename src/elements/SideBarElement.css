@@ -5,6 +5,8 @@ side-bar-element {
   width: 0;
   transition: width 200ms;
   position: relative;
+  user-select: none;
+  -webkit-user-select: none;
   > .shadow {
     pointer-events: none;
     position: absolute;

@@ -3,7 +3,8 @@ title-bar-element {
   height: 40px;
   align-items: center;
   padding: 4px;
-  cursor: default;
+  user-select: none;
+  -webkit-user-select: none;
   .left {
     flex: 1;
     display: flex;
