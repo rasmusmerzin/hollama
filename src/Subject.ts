@@ -2,12 +2,12 @@ export interface Subject<T> {
   addEventListener(
     type: "change",
     listener: (event: SubjectChangeEvent<T>) => any,
-    options?: AddEventListenerOptions | boolean
+    options?: AddEventListenerOptions | boolean,
   ): void;
   addEventListener(
     type: string,
     listener: (event: Event) => any,
-    options?: AddEventListenerOptions | boolean
+    options?: AddEventListenerOptions | boolean,
   ): void;
 }
 
@@ -33,19 +33,22 @@ export class Subject<T> extends EventTarget {
 
   subscribe(
     listener: (value: T, previous?: T) => any,
-    control: AbortController
+    control: AbortController | null,
   ) {
     this.addEventListener(
       "change",
       (e) => listener(e.current, e.previous),
-      control
+      control || undefined,
     );
     listener(this.value);
   }
 }
 
 export class SubjectChangeEvent<T> extends Event {
-  constructor(readonly current: T, readonly previous: T) {
+  constructor(
+    readonly current: T,
+    readonly previous: T,
+  ) {
     super("change");
   }
 }

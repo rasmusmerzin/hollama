@@ -1,21 +1,8 @@
 import { ModalWindowElement } from "../elements/ModalWindowElement";
 import { ModalWindowEntryElement } from "../elements/ModalWindowEntryElement";
 import { ModalWindowHeaderElement } from "../elements/ModalWindowHeaderElement";
-import { Subject } from "../Subject";
+import { PreferencesSubject } from "../Preferences";
 import { SwitchElement } from "../elements/SwitchElement";
-
-export const PreferencesSubject = new Subject({
-  darkMode: false,
-  smoothCorners: true,
-});
-
-PreferencesSubject.subscribe(({ darkMode, smoothCorners }) => {
-  if (darkMode) document.documentElement.setAttribute("dark", "");
-  else document.documentElement.removeAttribute("dark");
-  if (smoothCorners)
-    document.documentElement.setAttribute("smooth-corners", "");
-  else document.documentElement.removeAttribute("smooth-corners");
-}, null!);
 
 export function PreferencesModal() {
   let control: AbortController | undefined;
