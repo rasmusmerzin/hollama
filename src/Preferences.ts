@@ -5,16 +5,16 @@ export interface Preferences {
   smoothCorners: boolean;
 }
 
-export const PREFERENCES: Preferences = {
+export const PREFERENCES: Preferences = Object.freeze({
   darkMode: false,
   smoothCorners: true,
-};
+});
 
 export const PreferencesSubject = new Subject<Preferences>(
   (() => {
     const stored = localStorage.getItem("preferences");
-    if (stored) return Object.assign({}, PREFERENCES, JSON.parse(stored));
-    return PREFERENCES;
+    if (stored) return { ...PREFERENCES, ...JSON.parse(stored) };
+    return { ...PREFERENCES };
   })(),
 );
 
