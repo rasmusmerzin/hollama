@@ -19,7 +19,6 @@ side-bar-element {
     background: #0000;
     display: none;
     transition: background 200ms;
-    backdrop-filter: blur(8px);
   }
   &.open {
     width: 240px;

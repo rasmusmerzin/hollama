@@ -5,7 +5,7 @@ modal-window-element {
   left: 0;
   right: 0;
   bottom: 0;
-  background: #0004;
+  background: #0006;
   border-radius: var(--root-radius, 0);
   overflow: hidden;
   display: flex;

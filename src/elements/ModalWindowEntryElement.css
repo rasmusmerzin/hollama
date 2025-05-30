@@ -11,6 +11,7 @@ modal-window-entry-element {
   justify-content: space-between;
   user-select: none;
   -webkit-user-select: none;
+  transition: filter 200ms;
   &[join~="top"] {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
@@ -19,4 +20,11 @@ modal-window-entry-element {
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
   }
+  &:hover {
+    filter: brightness(0.95);
+  }
+}
+
+:root[dark] modal-window-entry-element:hover {
+  filter: brightness(1.2);
 }

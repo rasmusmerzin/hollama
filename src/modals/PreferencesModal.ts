@@ -35,28 +35,26 @@ export function PreferencesModal() {
         {
           label: "Dark Mode",
           join: "bottom",
-        },
-        (darkModeSwitch = createElement(SwitchElement, {
-          onchange: () =>
+          onclick: () =>
             PreferencesSubject.update((state) => ({
               ...state,
-              darkMode: darkModeSwitch.checked,
+              darkMode: !state.darkMode,
             })),
-        })),
+        },
+        (darkModeSwitch = createElement(SwitchElement)),
       ),
       createElement(
         ModalWindowEntryElement,
         {
           label: "Smooth Corners",
           join: "top",
-        },
-        (smoothCornersSwitch = createElement(SwitchElement, {
-          onchange: () =>
+          onclick: () =>
             PreferencesSubject.update((state) => ({
               ...state,
-              smoothCorners: smoothCornersSwitch.checked,
+              smoothCorners: !state.smoothCorners,
             })),
-        })),
+        },
+        (smoothCornersSwitch = createElement(SwitchElement)),
       ),
     ],
   );
