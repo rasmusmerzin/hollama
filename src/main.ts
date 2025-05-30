@@ -1,13 +1,14 @@
 import "./styles.css";
 import "@merzin/element";
+import { PreferencesModal } from "./modals/PreferencesModal";
 import {
   SIDE_BAR_BREAKPOINT,
   SideBarElement,
   SideBarSubject,
 } from "./elements/SideBarElement";
 import { TitleBarElement } from "./elements/TitleBarElement";
+import { defineRoute, startRouter } from "@merzin/router";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { hasBackHandlers, startRouter } from "@merzin/router";
 
 const root = document.getElementById("root")!;
 const titleBar = new TitleBarElement();
@@ -17,24 +18,20 @@ const appWindow = getCurrentWindow();
 
 root.append(sideBar, createElement("div", {}, [titleBar, main]));
 
-document.documentElement.setAttribute("dark", "");
-
 appWindow.onResized(async () => {
   const maximized = await appWindow.isMaximized();
-  if (maximized) root.setAttribute("maximized", "");
-  else root.removeAttribute("maximized");
+  if (maximized) document.documentElement.setAttribute("maximized", "");
+  else document.documentElement.removeAttribute("maximized");
 });
 
 addEventListener("keydown", ({ key }) => {
   if (key === "Escape") {
-    if (
-      !hasBackHandlers() &&
-      innerWidth < SIDE_BAR_BREAKPOINT &&
-      SideBarSubject.current().open
-    )
+    if (history.stack.index) history.back();
+    else if (innerWidth < SIDE_BAR_BREAKPOINT && SideBarSubject.current().open)
       SideBarSubject.update((state) => ({ ...state, open: false }));
-    else history.back();
   }
 });
 
-startRouter(root);
+defineRoute("#preferences", PreferencesModal);
+
+startRouter(main);

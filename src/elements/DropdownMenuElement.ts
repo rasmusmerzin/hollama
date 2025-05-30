@@ -1,4 +1,5 @@
 import "./DropdownMenuElement.css";
+import { onBack } from "@merzin/router";
 
 export interface DropdownMenuItem {
   label: string;
@@ -31,7 +32,7 @@ export class DropdownMenuElement extends HTMLElement {
               innerText: item.label,
               onclick: () => {
                 history.back();
-                item.action?.();
+                if (item.action) setTimeout(item.action);
               },
             }),
       ),
@@ -58,7 +59,8 @@ export class DropdownMenuElement extends HTMLElement {
     this.updatePosition();
     this.control?.abort();
     this.control = new AbortController();
-    addEventListener("resize", this.remove.bind(this), this.control);
+    onBack(this.remove.bind(this));
+    addEventListener("resize", () => history.back(), this.control);
   }
 
   disconnectedCallback() {

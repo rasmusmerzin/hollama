@@ -1,0 +1,41 @@
+switch-element {
+  display: inline-block;
+  height: 24px;
+  width: 44px;
+  border-radius: 12px;
+  background: #8888;
+  position: relative;
+  cursor: pointer;
+  transition:
+    filter 200ms,
+    background 200ms;
+  &::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 100%;
+    background: #fff;
+    opacity: 0.8;
+    box-shadow: 0 0 4px #0004;
+    transition:
+      left 200ms,
+      opacity 200ms;
+  }
+  &[checked] {
+    background: var(--primary);
+    &::after {
+      left: 23px;
+      opacity: 1;
+    }
+  }
+  &:hover {
+    filter: brightness(0.95);
+  }
+}
+
+:root[dark] switch-element:hover {
+  filter: brightness(1.2);
+}

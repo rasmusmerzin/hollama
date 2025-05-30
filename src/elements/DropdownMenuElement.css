@@ -4,16 +4,18 @@ dropdown-menu-element {
   width: 0;
   height: 0;
   &::before {
-    z-index: 1;
+    z-index: 2;
     content: "";
     pointer-events: none;
     position: absolute;
     left: 50%;
-    top: calc(100% + 4px);
+    top: calc(100% + 2px);
     transform: translateX(-50%) rotate(45deg);
-    width: 16px;
-    height: 16px;
-    background: var(--background-2);
+    width: 9px;
+    height: 9px;
+    background: var(--background-2s);
+    border-left: 1px solid #0004;
+    border-top: 1px solid #0004;
   }
   > .shadow {
     position: fixed;
@@ -31,20 +33,20 @@ dropdown-menu-element {
     transform: translateX(-50%);
     width: 200px;
     border-radius: 12px;
-    background: var(--background-2);
+    background: var(--background-2s);
     padding: 6px;
     display: flex;
     flex-direction: column;
+    box-shadow: 0 0 8px #0004;
     > div {
       height: 1px;
-      background: var(--foreground);
+      background: #8888;
       margin: 4px 0;
-      opacity: 0.5;
     }
     > button {
-      padding: 8px;
+      padding: 6px 8px;
       text-align: left;
-      background: var(--background-2);
+      background: var(--background-2s);
       border-radius: 8px;
     }
   }

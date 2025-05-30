@@ -1,0 +1,22 @@
+modal-window-entry-element {
+  display: block;
+  margin-bottom: 1px;
+  border-radius: 12px;
+  background: var(--background-2s);
+  box-shadow: 0 0 4px #0004;
+  height: 48px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+  -webkit-user-select: none;
+  &[join~="top"] {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+  &[join~="bottom"] {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+}

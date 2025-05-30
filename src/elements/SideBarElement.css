@@ -21,15 +21,6 @@ side-bar-element {
     transition: background 200ms;
     backdrop-filter: blur(8px);
   }
-  @media (max-width: 560px) {
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    > .shadow {
-      display: block;
-    }
-  }
   &.open {
     width: 240px;
     > .shadow {
@@ -45,7 +36,8 @@ side-bar-element {
     height: 40px;
     align-items: center;
     padding: 4px;
-    cursor: default;
+    user-select: none;
+    -webkit-user-select: none;
     .left {
       flex: 1;
       display: flex;
@@ -74,5 +66,26 @@ side-bar-element {
         height: 20px;
       }
     }
+  }
+  @media (max-width: 560px) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    background: var(--background-1s);
+    > .title {
+      button {
+        background: var(--background-1s);
+      }
+    }
+    > .shadow {
+      display: block;
+    }
+  }
+}
+
+:root:not([dark]) side-bar-element.open {
+  @media (min-width: 560px) {
+    border-right: 1px solid #8884;
   }
 }

@@ -1,0 +1,12 @@
+modal-window-header-element {
+  display: block;
+  user-select: none;
+  -webkit-user-select: none;
+  margin: 16px 0 8px;
+  > .title {
+    font-weight: bold;
+  }
+  > .description {
+    opacity: 0.5;
+  }
+}

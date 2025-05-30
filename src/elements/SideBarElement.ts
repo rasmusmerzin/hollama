@@ -3,12 +3,11 @@ import { DropdownMenuElement } from "./DropdownMenuElement";
 import { ICON_ADD_CHAT, ICON_MENU } from "../icons";
 import { Subject } from "../Subject";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { onBack } from "@merzin/router";
 import { ondoubleclick } from "../ondoubleclick";
 
 export const SIDE_BAR_BREAKPOINT = 560;
 
-export const SideBarSubject = new Subject<{ open: boolean }>({
+export const SideBarSubject = new Subject({
   open: innerWidth >= SIDE_BAR_BREAKPOINT,
 });
 
@@ -40,23 +39,7 @@ export class SideBarElement extends HTMLElement {
             (this.menuButton = createElement("button", {
               innerHTML: ICON_MENU,
               onmousedown: stopPropagation,
-              onclick: () => {
-                this.menuButton.classList.add("active");
-                const dropdownMenuElement = createElement(DropdownMenuElement, {
-                  anchor: this.menuButton,
-                  ondisconnect: () =>
-                    this.menuButton.classList.remove("active"),
-                  items: [
-                    // { label: "New Window" },
-                    // { label: "New Tab" },
-                    // "div",
-                    { label: "Preferences" },
-                    { label: "About Hollama" },
-                  ],
-                });
-                document.body.append(dropdownMenuElement);
-                onBack(() => dropdownMenuElement.remove());
-              },
+              onclick: this.openDropdownMenu.bind(this),
             })),
           ]),
         ],
@@ -87,6 +70,25 @@ export class SideBarElement extends HTMLElement {
   disconnectedCallback() {
     this.control?.abort();
     delete this.control;
+  }
+
+  private openDropdownMenu() {
+    this.menuButton.classList.add("active");
+    document.body.append(
+      createElement(DropdownMenuElement, {
+        anchor: this.menuButton,
+        ondisconnect: () => this.menuButton.classList.remove("active"),
+        items: [
+          { label: "Models" },
+          "div",
+          {
+            label: "Preferences",
+            action: () => history.pushState({}, "", "#preferences"),
+          },
+          { label: "About Hollama" },
+        ],
+      }),
+    );
   }
 
   private onResize() {

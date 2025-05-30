@@ -2,9 +2,13 @@
   --foreground: hsl(0, 0%, 2%);
   --background: hsl(0, 0%, 94%);
   --background-0: hsl(0, 0%, 100%);
-  --background-1: hsl(0, 0%, 80%);
-  --background-2: hsl(0, 0%, 66%);
+  --background-1: hsl(0, 0%, 85%);
+  --background-1s: var(--background);
+  --background-2: hsl(0, 0%, 70%);
+  --background-2s: var(--background);
+  --background-2b: var(--background-1);
   --highlight: hsl(0, 0%, 100%);
+  --primary: hsl(210, 100%, 50%);
   font-family: "Open Sans", Helvetica, sans-serif;
   font-size: 14px;
   line-height: 20px;
@@ -21,7 +25,10 @@
   --background: hsl(0, 0%, 10%);
   --background-0: hsl(0, 0%, 0%);
   --background-1: hsl(0, 0%, 20%);
-  --background-2: hsl(0, 0%, 33%);
+  --background-1s: var(--background-1);
+  --background-2: hsl(0, 0%, 30%);
+  --background-2s: var(--background-2);
+  --background-2b: var(--background-2);
   --highlight: hsl(0, 0%, 40%);
 }
 
@@ -31,21 +38,7 @@
   height: 100vh;
   overflow: hidden;
   position: relative;
-  &:not([maximized]) {
-    border-radius: 14px;
-    &::after {
-      z-index: 1000;
-      content: "";
-      pointer-events: none;
-      position: absolute;
-      top: 1px;
-      left: 1px;
-      right: 1px;
-      bottom: 1px;
-      border-radius: inherit;
-      box-shadow: inset 0 0 2px var(--highlight);
-    }
-  }
+  border-radius: var(--root-radius, 0);
   > div {
     flex: 1;
     display: flex;
@@ -53,6 +46,21 @@
     > div {
       flex: 1;
     }
+  }
+}
+:root:not([maximized])[smooth-corners] #root {
+  --root-radius: 14px;
+  &::after {
+    z-index: 100;
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    right: 1px;
+    bottom: 1px;
+    border-radius: inherit;
+    box-shadow: inset 0 0 2px var(--highlight);
   }
 }
 
@@ -80,6 +88,6 @@ button:not(:disabled) {
   }
 }
 
-[dark] button:not(:disabled):hover {
+:root[dark] button:not(:disabled):hover {
   filter: brightness(1.5);
 }
