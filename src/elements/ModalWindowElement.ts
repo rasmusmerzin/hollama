@@ -27,9 +27,23 @@ export class ModalWindowElement extends HTMLElement {
   set label(value: string) {
     this.titleCenterElement.innerText = value;
   }
+  get width(): number {
+    return Number(this.style.getPropertyValue("--width"));
+  }
+  set width(value: number) {
+    this.style.setProperty("--width", String(value));
+  }
+  get height(): number {
+    return Number(this.style.getPropertyValue("--height"));
+  }
+  set height(value: number) {
+    this.style.setProperty("--height", String(value));
+  }
 
   constructor() {
     super();
+    this.width = 640;
+    this.height = 480;
     this.onmousedown = () =>
       innerWidth < MODAL_WINDOW_BREAKPOINT
         ? history.back()

@@ -15,18 +15,13 @@ modal-window-element {
   > .window {
     background: var(--background-1s);
     border-radius: 14px;
-    width: 640px;
+    width: calc(var(--width) * 1px);
     max-width: calc(100% - 64px);
+    min-height: min(calc(var(--height) * 1px), calc(100% - 64px));
     max-height: calc(100% - 64px);
     position: relative;
     display: flex;
     flex-direction: column;
-    @media (min-height: 560px) {
-      min-height: 500px;
-    }
-    @media (max-height: 560px) {
-      min-height: calc(100% - 64px);
-    }
     @media (min-height: 532px) {
       max-height: calc(100% - 12vh);
     }
@@ -99,8 +94,6 @@ modal-window-element {
     align-items: flex-end;
     > .window {
       max-width: 100%;
-      min-height: calc(100% - 32px);
-      height: calc(100% - 32px);
       max-height: calc(100% - 32px);
       border-bottom-left-radius: var(--root-radius, 0);
       border-bottom-right-radius: var(--root-radius, 0);

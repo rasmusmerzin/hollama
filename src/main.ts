@@ -9,6 +9,7 @@ import {
 import { TitleBarElement } from "./elements/TitleBarElement";
 import { defineRoute, startRouter } from "@merzin/router";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { AboutModal } from "./modals/AboutModal";
 
 const root = document.getElementById("root")!;
 const titleBar = new TitleBarElement();
@@ -33,5 +34,6 @@ addEventListener("keydown", ({ key }) => {
 });
 
 defineRoute("#preferences", PreferencesModal);
+defineRoute("#about", AboutModal);
 
 startRouter(main);

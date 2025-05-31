@@ -85,7 +85,10 @@ export class SideBarElement extends HTMLElement {
             label: "Preferences",
             action: () => history.pushState({}, "", "#preferences"),
           },
-          { label: "About Hollama" },
+          {
+            label: "About Hollama",
+            action: () => history.pushState({}, "", "#about"),
+          },
         ],
       }),
     );
