@@ -1,15 +1,12 @@
 import "./styles.css";
 import "@merzin/element";
+import { AboutModal } from "./modals/AboutModal";
 import { PreferencesModal } from "./modals/PreferencesModal";
-import {
-  SIDE_BAR_BREAKPOINT,
-  SideBarElement,
-  SideBarSubject,
-} from "./elements/SideBarElement";
+import { SIDE_BAR_BREAKPOINT, SideBarElement } from "./elements/SideBarElement";
+import { SideBarSubject } from "./subjects/SideBarSubject";
 import { TitleBarElement } from "./elements/TitleBarElement";
 import { defineRoute, startRouter } from "@merzin/router";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { AboutModal } from "./modals/AboutModal";
 
 const root = document.getElementById("root")!;
 const titleBar = new TitleBarElement();

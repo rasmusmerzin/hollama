@@ -1,7 +1,7 @@
 import { ModalWindowElement } from "../elements/ModalWindowElement";
 import { ModalWindowEntryElement } from "../elements/ModalWindowEntryElement";
 import { ModalWindowHeaderElement } from "../elements/ModalWindowHeaderElement";
-import { PreferencesSubject } from "../Preferences";
+import { PreferencesSubject } from "../subjects/PreferencesSubject";
 import { SwitchElement } from "../elements/SwitchElement";
 
 export function PreferencesModal() {

@@ -1,15 +1,11 @@
 import "./SideBarElement.css";
 import { DropdownMenuElement } from "./DropdownMenuElement";
 import { ICON_ADD_CHAT, ICON_MENU } from "../icons";
-import { Subject } from "../Subject";
+import { SideBarSubject } from "../subjects/SideBarSubject";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { ondoubleclick } from "../ondoubleclick";
 
 export const SIDE_BAR_BREAKPOINT = 560;
-
-export const SideBarSubject = new Subject({
-  open: innerWidth >= SIDE_BAR_BREAKPOINT,
-});
 
 @tag("side-bar-element")
 export class SideBarElement extends HTMLElement {
@@ -59,6 +55,7 @@ export class SideBarElement extends HTMLElement {
       if (open) this.classList.add("open");
       else this.classList.remove("open");
     }, this.control);
+    this.onResize();
     addEventListener("resize", this.onResize.bind(this), this.control);
     ondoubleclick(
       this.titleElement,

@@ -1,6 +1,6 @@
 import "./TitleBarElement.css";
 import { ICON_CLOSE, ICON_DOCK_TO_RIGHT } from "../icons";
-import { SideBarSubject } from "./SideBarElement";
+import { SideBarSubject } from "../subjects/SideBarSubject";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { ondoubleclick } from "../ondoubleclick";
 
