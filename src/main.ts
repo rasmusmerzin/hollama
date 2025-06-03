@@ -2,8 +2,7 @@ import "./styles.css";
 import "@merzin/element";
 import { AboutModal } from "./modals/AboutModal";
 import { PreferencesModal } from "./modals/PreferencesModal";
-import { SIDE_BAR_BREAKPOINT, SideBarElement } from "./elements/SideBarElement";
-import { SideBarSubject } from "./subjects/SideBarSubject";
+import { SideBarElement } from "./elements/SideBarElement";
 import { TitleBarElement } from "./elements/TitleBarElement";
 import { defineRoute, startRouter } from "@merzin/router";
 import { getCurrentWindow } from "@tauri-apps/api/window";
@@ -23,11 +22,7 @@ appWindow.onResized(async () => {
 });
 
 addEventListener("keydown", ({ key }) => {
-  if (key === "Escape") {
-    if (history.stack.index) history.back();
-    else if (innerWidth < SIDE_BAR_BREAKPOINT && SideBarSubject.current().open)
-      SideBarSubject.update((state) => ({ ...state, open: false }));
-  }
+  if (key === "Escape") history.back();
 });
 
 defineRoute("#preferences", PreferencesModal);
