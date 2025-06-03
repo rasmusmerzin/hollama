@@ -2,7 +2,7 @@ import "./TitleBarElement.css";
 import { ICON_CLOSE, ICON_DOCK_TO_RIGHT } from "../icons";
 import { SideBarSubject } from "../subjects/SideBarSubject";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { ondoubleclick } from "../ondoubleclick";
+import { onDoubleClick } from "../onDoubleClick";
 
 @tag("title-bar-element")
 export class TitleBarElement extends HTMLElement {
@@ -41,7 +41,7 @@ export class TitleBarElement extends HTMLElement {
       if (open) this.dockButton.classList.add("active");
       else this.dockButton.classList.remove("active");
     }, this.control);
-    ondoubleclick(
+    onDoubleClick(
       this,
       () => this.appWindow.toggleMaximize(),
       this.control.signal,

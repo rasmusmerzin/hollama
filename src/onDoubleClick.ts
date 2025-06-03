@@ -1,4 +1,4 @@
-export function ondoubleclick(
+export function onDoubleClick(
   element: HTMLElement,
   handler: (event: MouseEvent) => any,
   signal?: AbortSignal,

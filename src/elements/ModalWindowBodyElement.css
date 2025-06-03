@@ -1,0 +1,13 @@
+modal-window-body-element {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  padding: 16px;
+  > .content {
+    width: 540px;
+    max-width: 100%;
+    height: min-content;
+  }
+}

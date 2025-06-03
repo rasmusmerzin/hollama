@@ -36,59 +36,6 @@ modal-window-element {
       border-radius: inherit;
       box-shadow: inset 0 0 2px var(--highlight);
     }
-    > .title {
-      display: flex;
-      height: 40px;
-      align-items: center;
-      padding: 4px;
-      user-select: none;
-      -webkit-user-select: none;
-      .left {
-        flex: 1;
-        display: flex;
-      }
-      .center {
-        font-weight: bold;
-      }
-      .right {
-        flex: 1;
-        display: flex;
-        justify-content: flex-end;
-      }
-      button {
-        width: 32px;
-        height: 32px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        border-radius: 8px;
-        background: var(--background-1s);
-        &.circle {
-          border-radius: 100%;
-          transform: scale(0.75);
-        }
-        &.active {
-          background: var(--background-2b);
-        }
-        svg {
-          width: 20px;
-          height: 20px;
-        }
-      }
-    }
-    > .container {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      overflow-y: auto;
-      scrollbar-width: thin;
-      padding: 16px 16px 32px;
-      > .content {
-        width: 540px;
-        max-width: 100%;
-        height: min-content;
-      }
-    }
   }
   @media (max-width: 440px) {
     align-items: flex-end;
@@ -97,9 +44,6 @@ modal-window-element {
       max-height: calc(100% - 32px);
       border-bottom-left-radius: var(--root-radius, 0);
       border-bottom-right-radius: var(--root-radius, 0);
-      > .container {
-        padding: 16px 12px;
-      }
     }
   }
 }

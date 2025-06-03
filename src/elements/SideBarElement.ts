@@ -3,7 +3,7 @@ import { DropdownMenuElement } from "./DropdownMenuElement";
 import { ICON_ADD_CHAT, ICON_MENU } from "../icons";
 import { SideBarSubject } from "../subjects/SideBarSubject";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { ondoubleclick } from "../ondoubleclick";
+import { onDoubleClick } from "../onDoubleClick";
 
 export const SIDE_BAR_BREAKPOINT = 560;
 
@@ -60,7 +60,7 @@ export class SideBarElement extends HTMLElement {
       else this.classList.remove("open");
     }, this.control);
     addEventListener("resize", this.onResize.bind(this), this.control);
-    ondoubleclick(
+    onDoubleClick(
       this.titleElement,
       () => this.appWindow.toggleMaximize(),
       this.control.signal,

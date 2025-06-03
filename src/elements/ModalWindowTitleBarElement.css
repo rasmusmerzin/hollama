@@ -1,0 +1,41 @@
+modal-window-title-bar-element {
+  flex-shrink: 0;
+  display: flex;
+  height: 40px;
+  align-items: center;
+  padding: 4px;
+  user-select: none;
+  -webkit-user-select: none;
+  > .left {
+    flex: 1;
+    display: flex;
+  }
+  > .center {
+    font-weight: bold;
+  }
+  > .right {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+  }
+  button {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+    background: var(--background-1s);
+    &.circle {
+      border-radius: 100%;
+      transform: scale(0.75);
+    }
+    &.active {
+      background: var(--background-2b);
+    }
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}

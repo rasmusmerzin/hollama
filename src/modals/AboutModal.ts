@@ -1,5 +1,7 @@
 import "./AboutModal.css";
+import { ModalWindowBodyElement } from "../elements/ModalWindowBodyElement";
 import { ModalWindowElement } from "../elements/ModalWindowElement";
+import { ModalWindowTitleBarElement } from "../elements/ModalWindowTitleBarElement";
 import { getVersion } from "@tauri-apps/api/app";
 
 export function AboutModal() {
@@ -10,13 +12,16 @@ export function AboutModal() {
   getVersion().then((version) => (versionButton.innerText = version));
   return createElement(
     ModalWindowElement,
-    { className: "about", width: 360, height: 360 },
+    { className: "about", width: 360, height: 400 },
     [
-      createElement("div", { className: "head" }, [
-        createElement("img", { src: "/icon.svg", height: 192 }),
-        createElement("h1", {}, "Hollama"),
-        createElement("p", {}, "Desktop client for Ollama"),
-        versionButton,
+      createElement(ModalWindowTitleBarElement),
+      createElement(ModalWindowBodyElement, {}, [
+        createElement("div", { className: "head" }, [
+          createElement("img", { src: "/icon.svg", height: 192 }),
+          createElement("h1", {}, "Hollama"),
+          createElement("p", {}, "Desktop client for Ollama"),
+          versionButton,
+        ]),
       ]),
     ],
   );

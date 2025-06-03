@@ -1,16 +1,13 @@
+import { onDoubleClick } from "../onDoubleClick";
 import "./ModalWindowElement.css";
-import { ICON_CLOSE } from "../icons";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { ondoubleclick } from "../ondoubleclick";
 
 export const MODAL_WINDOW_BREAKPOINT = 440;
 
 @tag("modal-window-element")
 export class ModalWindowElement extends HTMLElement {
   private appWindow = getCurrentWindow();
-  private titleElement: HTMLDivElement;
-  private titleCenterElement: HTMLDivElement;
-  private contentElement: HTMLDivElement;
+  private windowElement: HTMLDivElement;
   private control?: AbortController;
   private timeouts: any[] = [];
   private removed = false;
@@ -19,13 +16,7 @@ export class ModalWindowElement extends HTMLElement {
   ondisconnect: (() => any) | null = null;
 
   get niche() {
-    return this.contentElement;
-  }
-  get label() {
-    return this.titleCenterElement.innerText;
-  }
-  set label(value: string) {
-    this.titleCenterElement.innerText = value;
+    return this.windowElement;
   }
   get width(): number {
     return Number(this.style.getPropertyValue("--width"));
@@ -44,43 +35,12 @@ export class ModalWindowElement extends HTMLElement {
     super();
     this.width = 640;
     this.height = 480;
-    this.onmousedown = () =>
-      innerWidth < MODAL_WINDOW_BREAKPOINT
-        ? history.back()
-        : this.appWindow.startDragging();
     this.replaceChildren(
-      createElement(
-        "div",
-        { className: "window", onmousedown: stopPropagation },
-        [
-          (this.titleElement = createElement(
-            "div",
-            {
-              className: "title",
-              onmousedown: () => this.appWindow.startDragging(),
-            },
-            [
-              createElement("div", { className: "left" }),
-              (this.titleCenterElement = createElement("div", {
-                className: "center",
-              })),
-              createElement("div", { className: "right" }, [
-                createElement("button", {
-                  className: "active circle",
-                  innerHTML: ICON_CLOSE,
-                  onmousedown: stopPropagation,
-                  onclick: () => history.back(),
-                }),
-              ]),
-            ],
-          )),
-          createElement("div", { className: "container" }, [
-            (this.contentElement = createElement("div", {
-              className: "content",
-            })),
-          ]),
-        ],
-      ),
+      (this.windowElement = createElement("div", {
+        className: "window",
+        onmousedown: (e) => e.stopPropagation(),
+        onclick: (e) => e.stopPropagation(),
+      })),
     );
   }
 
@@ -88,9 +48,14 @@ export class ModalWindowElement extends HTMLElement {
     this.removed = false;
     this.control?.abort();
     this.control = new AbortController();
-    ondoubleclick(
-      this.titleElement,
-      () => this.appWindow.toggleMaximize(),
+    this.addEventListener(
+      "mousedown",
+      this.onMousedown.bind(this),
+      this.control,
+    );
+    onDoubleClick(
+      this,
+      () => !this.removed && this.appWindow.toggleMaximize(),
       this.control.signal,
     );
     this.setAttribute("state", "opening");
@@ -122,11 +87,12 @@ export class ModalWindowElement extends HTMLElement {
     );
   }
 
+  private onMousedown() {
+    if (innerWidth < MODAL_WINDOW_BREAKPOINT) history.back();
+    else this.appWindow.startDragging();
+  }
+
   private clearTimeouts() {
     this.timeouts.splice(0, this.timeouts.length).forEach(clearTimeout);
   }
-}
-
-function stopPropagation(event: Event) {
-  event.stopPropagation();
 }
