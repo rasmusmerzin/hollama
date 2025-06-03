@@ -51,11 +51,14 @@ export class SideBarElement extends HTMLElement {
   connectedCallback() {
     this.control?.abort();
     this.control = new AbortController();
+    SideBarSubject.update((state) => ({
+      ...state,
+      open: innerWidth >= SIDE_BAR_BREAKPOINT,
+    }));
     SideBarSubject.subscribe(({ open }) => {
       if (open) this.classList.add("open");
       else this.classList.remove("open");
     }, this.control);
-    this.onResize();
     addEventListener("resize", this.onResize.bind(this), this.control);
     ondoubleclick(
       this.titleElement,
@@ -91,14 +94,21 @@ export class SideBarElement extends HTMLElement {
     );
   }
 
+  private previousWidth = innerWidth;
   private onResize() {
-    if (innerWidth < SIDE_BAR_BREAKPOINT && SideBarSubject.current().open)
-      SideBarSubject.update((state) => ({ ...state, open: false }));
-    else if (
+    if (
+      this.previousWidth < SIDE_BAR_BREAKPOINT &&
       innerWidth >= SIDE_BAR_BREAKPOINT &&
       !SideBarSubject.current().open
     )
       SideBarSubject.update((state) => ({ ...state, open: true }));
+    else if (
+      this.previousWidth >= SIDE_BAR_BREAKPOINT &&
+      innerWidth < SIDE_BAR_BREAKPOINT &&
+      SideBarSubject.current().open
+    )
+      SideBarSubject.update((state) => ({ ...state, open: false }));
+    this.previousWidth = innerWidth;
   }
 }
 
