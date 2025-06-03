@@ -6,6 +6,7 @@ import { SideBarElement } from "./elements/SideBarElement";
 import { TitleBarElement } from "./elements/TitleBarElement";
 import { defineRoute, startRouter } from "@merzin/router";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { ModelsModal } from "./modals/ModelsModal";
 
 const root = document.getElementById("root")!;
 const titleBar = new TitleBarElement();
@@ -31,5 +32,6 @@ addEventListener("contextmenu", (event) => {
 
 defineRoute("#preferences", PreferencesModal);
 defineRoute("#about", AboutModal);
+defineRoute("#models", ModelsModal);
 
 startRouter({ viewRoot: main, modalRoot: root });
