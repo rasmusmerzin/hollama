@@ -28,4 +28,4 @@ addEventListener("keydown", ({ key }) => {
 defineRoute("#preferences", PreferencesModal);
 defineRoute("#about", AboutModal);
 
-startRouter(main);
+startRouter({ viewRoot: main, modalRoot: root });

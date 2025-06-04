@@ -29,7 +29,7 @@
   --background-2: hsl(0, 0%, 30%);
   --background-2s: var(--background-2);
   --background-2b: var(--background-2);
-  --highlight: hsl(0, 0%, 40%);
+  --highlight: hsl(0, 0%, 35%);
 }
 
 #root {
@@ -43,8 +43,9 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    > div {
+    > main {
       flex: 1;
+      position: relative;
     }
   }
 }
