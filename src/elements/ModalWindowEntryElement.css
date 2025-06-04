@@ -12,6 +12,7 @@ modal-window-entry-element {
   user-select: none;
   -webkit-user-select: none;
   transition: filter 200ms;
+  cursor: pointer;
   &[join~="top"] {
     border-top-left-radius: 0;
     border-top-right-radius: 0;

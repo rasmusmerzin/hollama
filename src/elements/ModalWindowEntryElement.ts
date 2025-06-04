@@ -20,6 +20,7 @@ export class ModalWindowEntryElement extends HTMLElement {
 
   constructor() {
     super();
+    this.tabIndex = 0;
     this.replaceChildren(
       (this.labelElement = createElement("div", { className: "label" })),
     );

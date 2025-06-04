@@ -23,6 +23,11 @@ export class SwitchElement extends HTMLElement {
     this.value = value;
   }
 
+  constructor() {
+    super();
+    this.tabIndex = 0;
+  }
+
   connectedCallback() {
     this.control?.abort();
     this.control = new AbortController();
