@@ -4,7 +4,8 @@ modal-window-body-element {
   justify-content: center;
   overflow-y: auto;
   scrollbar-width: thin;
-  padding: 16px;
+  padding: 16px 16px 32px;
+  position: relative;
   > .content {
     width: 540px;
     max-width: 100%;
