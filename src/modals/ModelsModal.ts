@@ -1,22 +1,29 @@
 import "./ModelsModal.css";
+import { ICON_DELETE, ICON_DOWNLOAD, ICON_SPINNER } from "../icons";
 import { ModalWindowBodyElement } from "../elements/ModalWindowBodyElement";
 import { ModalWindowElement } from "../elements/ModalWindowElement";
 import { ModalWindowEntryElement } from "../elements/ModalWindowEntryElement";
 import { ModalWindowHeaderElement } from "../elements/ModalWindowHeaderElement";
 import { ModalWindowTitleBarElement } from "../elements/ModalWindowTitleBarElement";
+import { Model } from "../services/ollama";
 import {
-  Model,
   ModelsSubject,
+  removeModel,
+  startModelDownload,
   syncModelDetails,
 } from "../subjects/ModelsSubject";
 import { TagElement } from "../elements/TagElement";
 import { stripObject } from "../stripObject";
+import { throttle } from "../throttle";
+import { formatByteCount } from "../formatByteCount";
 
 export function ModelsModal() {
   let listBody: ModalWindowBodyElement;
   let detailsBody: ModalWindowBodyElement;
   let titleBar: ModalWindowTitleBarElement;
   let control: AbortController | undefined;
+
+  const renderThrottled = throttle(render, 100);
 
   return createElement(
     ModalWindowElement,
@@ -25,7 +32,7 @@ export function ModelsModal() {
       (titleBar = createElement(ModalWindowTitleBarElement, {
         label: "Models",
         searchable: true,
-        onsearch: renderList,
+        onsearch: renderThrottled,
       })),
       createElement("div", { className: "container" }, [
         (listBody = createElement(ModalWindowBodyElement)),
@@ -40,7 +47,7 @@ export function ModelsModal() {
     control?.abort();
     control = new AbortController();
     onStateChange();
-    ModelsSubject.subscribe(render, control);
+    ModelsSubject.subscribe(renderThrottled, control);
     addEventListener("statechange", onStateChange, control);
   }
 
@@ -55,13 +62,13 @@ export function ModelsModal() {
     else {
       detailsBody.classList.remove("hidden");
       syncModelDetails(submodal);
-      renderDetails();
     }
+    renderThrottled();
   }
 
   function render() {
-    if (history.state.submodal) renderDetails();
-    else renderList();
+    if (history.state.submodal == null) renderList();
+    else renderDetails();
   }
 
   function renderList() {
@@ -78,10 +85,22 @@ export function ModelsModal() {
       }
       return true;
     });
-    const installed = models.filter((model) => model.installed?.length);
-    const available = models.filter((model) => !model.installed?.length);
+    const downloading: Model[] = [];
+    const installed: Model[] = [];
+    const available: Model[] = [];
+    for (const model of models) {
+      if (model.tags.some((tag) => tag.downloading)) downloading.push(model);
+      else if (model.tags.some((tag) => tag.installed)) installed.push(model);
+      else available.push(model);
+    }
     if (installed.length || available.length)
       listBody.niche.replaceChildren(
+        ...(downloading.length
+          ? [
+              createElement(ModalWindowHeaderElement, { label: "Downloading" }),
+              ...constructModelEntries(downloading),
+            ]
+          : []),
         ...(installed.length
           ? [
               createElement(ModalWindowHeaderElement, { label: "Installed" }),
@@ -120,17 +139,44 @@ export function ModelsModal() {
         ? [
             createElement(ModalWindowHeaderElement, { label: "Tags" }),
             ...model.tags.map((tag, i) =>
-              createElement(ModalWindowEntryElement, {
-                height: 64,
-                label: `${model.name}:${tag.label}`,
-                description: [tag.size, tag.context, tag.input?.join(", ")]
-                  .filter(Boolean)
-                  .join(" • "),
-                join: [
-                  ...(i > 0 ? ["top"] : []),
-                  ...(i < model.tags.length - 1 ? ["bottom"] : []),
-                ].join(" "),
-              }),
+              createElement(
+                ModalWindowEntryElement,
+                {
+                  height: 64,
+                  label: `${model.name}:${tag.label}`,
+                  description: [
+                    tag.size && tag.completed != null
+                      ? `${formatByteCount(tag.completed)}/${tag.size}`
+                      : tag.size,
+                    tag.context,
+                    tag.input?.join(", "),
+                  ]
+                    .filter(Boolean)
+                    .join(" • "),
+                  join: [
+                    ...(i > 0 ? ["top"] : []),
+                    ...(i < model.tags.length - 1 ? ["bottom"] : []),
+                  ].join(" "),
+                },
+                tag.downloading
+                  ? createElement("div", {
+                      className: "spinner",
+                      innerHTML: ICON_SPINNER,
+                    })
+                  : tag.installed
+                    ? createElement("button", {
+                        className: "action",
+                        innerHTML: ICON_DELETE,
+                        onclick: () =>
+                          removeModel(`${model.name}:${tag.label}`),
+                      })
+                    : createElement("button", {
+                        className: "action",
+                        innerHTML: ICON_DOWNLOAD,
+                        onclick: () =>
+                          startModelDownload(`${model.name}:${tag.label}`),
+                      }),
+              ),
             ),
           ]
         : []),
@@ -152,7 +198,7 @@ export function ModelsModal() {
             ...model.tags.map((tag) =>
               createElement(
                 TagElement,
-                { disabled: !model.installed?.includes(tag.label) },
+                { disabled: !tag.installed },
                 tag.label,
               ),
             ),

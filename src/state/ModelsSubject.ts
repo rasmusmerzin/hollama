@@ -1,47 +1,26 @@
-import { Subject } from "../Subject";
 import {
+  Model,
+  ModelInstance,
+  deleteModel,
   getAvailableModels,
   getInstalledModels,
   getModelDetails,
+  pullModel,
 } from "../services/ollama";
+import { Subject } from "../Subject";
+import { throttle } from "../throttle";
 
-export interface Model {
+export interface ModelDownload {
   name: string;
-  description: string;
-  tags: ModelTag[];
-  latestTag?: string;
-  categories: string[];
-  installed?: string[];
-}
-
-export interface ModelTag {
-  label: string;
-  size?: string;
-  context?: string;
-  input?: string[];
-}
-
-export interface ModelInstance {
-  name: string;
-  model: string;
-  modified_at: string;
-  size: number; // in bytes
-  digest: string;
-  details: {
-    parent_model: string;
-    format: string;
-    family: string;
-    families: string[];
-    parameter_size: string;
-    quantization_level: string;
-  };
+  status: string;
+  layers: Record<string, { total: number; completed: number }>;
 }
 
 export const ModelsSubject = new Subject<Record<string, Model>>({});
 
 const ModelDetailsSubject = new Subject<Record<string, Model>>(
   (() => {
-    const stored = localStorage.getItem("models_details");
+    const stored = localStorage.getItem("model_details");
     if (stored) return JSON.parse(stored);
     return {};
   })(),
@@ -56,23 +35,71 @@ const InstalledModelsSubject = new Subject<ModelInstance[]>(
     return [];
   })(),
 );
+const ModelDownloadsSubject = new Subject<Record<string, ModelDownload>>({});
+
+const updateModelsSubjectThrottled = throttle(updateModelsSubject, 2000);
 
 AvailableModelsSubject.subscribe((data) => {
   localStorage.setItem("available_models", data);
-  ModelsSubject.next(constructModels());
+  updateModelsSubjectThrottled();
 }, null);
 InstalledModelsSubject.subscribe((models) => {
   localStorage.setItem("installed_models", JSON.stringify(models));
-  ModelsSubject.next(constructModels());
+  updateModelsSubjectThrottled();
   fetchMissingDetailsForInstalled();
+  removeFinishedDownloads();
 }, null);
 ModelDetailsSubject.subscribe((details) => {
-  localStorage.setItem("models_details", JSON.stringify(details));
-  ModelsSubject.next(constructModels());
+  localStorage.setItem("model_details", JSON.stringify(details));
+  updateModelsSubjectThrottled();
 }, null);
+ModelDownloadsSubject.subscribe(updateModelsSubjectThrottled, null);
 
 syncAvailableModels({ retryInterval: 2_000 });
 syncInstalledModels({ interval: 2_000 });
+
+export function startModelDownload(name: string): Promise<boolean> {
+  const download = ModelDownloadsSubject.current()[name] || {
+    name,
+    layers: {},
+  };
+  return new Promise((resolve, reject) =>
+    pullModel(name, async ({ status, digest, total, completed }) => {
+      resolve(true);
+      if (status === "success") {
+        try {
+          await syncInstalledModels();
+        } finally {
+          ModelDownloadsSubject.update((downloads) => {
+            delete downloads[name];
+            return downloads;
+          });
+        }
+      } else {
+        if (digest && total && completed)
+          download.layers[digest] = { total, completed };
+        Object.assign(download, { status });
+        ModelDownloadsSubject.update((downloads) => {
+          downloads[name] = download;
+          return downloads;
+        });
+      }
+    })
+      .then(() => resolve(true))
+      .catch(reject),
+  );
+}
+
+export async function removeModel(name: string): Promise<void> {
+  await deleteModel(name).catch(console.error);
+  await syncInstalledModels().catch(console.error);
+  const download = ModelDownloadsSubject.current()[name];
+  if (!download) return;
+  ModelDownloadsSubject.update((downloads) => {
+    delete downloads[name];
+    return downloads;
+  });
+}
 
 export async function syncModelDetails(name: string) {
   const current = ModelDetailsSubject.current()[name];
@@ -134,33 +161,70 @@ async function fetchMissingDetailsForInstalled() {
     ModelDetailsSubject.update((current) => ({ ...current, ...updateObject }));
 }
 
+function removeFinishedDownloads() {
+  const downloads = ModelDownloadsSubject.current();
+  const installed = InstalledModelsSubject.current().map((model) => model.name);
+  if (!installed.some((name) => downloads[name])) return;
+  ModelDownloadsSubject.update((current) => {
+    for (const name of installed) delete current[name];
+    return current;
+  });
+}
+
+function updateModelsSubject() {
+  ModelsSubject.next(constructModels());
+}
+
 function constructModels(): Record<string, Model> {
   const available: Model[] = JSON.parse(AvailableModelsSubject.current());
   const details = ModelDetailsSubject.current();
   const models = Object.assign(
     Object.fromEntries(available.map((model) => [model.name, model])),
-    details,
+    JSON.parse(JSON.stringify(details)) as Record<string, Model>,
   );
   const installed = InstalledModelsSubject.current();
+  const downloads = ModelDownloadsSubject.current();
   for (const instance of installed) {
-    let [name, tag] = instance.name.split(":");
-    const { latestTag } = details[name] || {};
-    if (!tag) tag = "latest";
-    if (name in models) {
-      const model = models[name];
-      if (!model.installed) model.installed = [];
-      model.installed.push(tag);
-      if (latestTag) {
-        model.latestTag = latestTag;
-        if (tag === "latest") model.installed.push(latestTag);
+    let [name, tagLabel] = instance.name.split(":");
+    if (!tagLabel) tagLabel = "latest";
+    const model = models[name];
+    if (model) {
+      const tag = model.tags.find((t) => t.label === tagLabel);
+      if (tag) tag.installed = true;
+      if (model.latestTag && tagLabel === "latest") {
+        const tag = model.tags.find((t) => t.label === model.latestTag);
+        if (tag) tag.installed = true;
       }
     } else {
       models[name] = {
         name,
         description: "",
-        tags: [{ label: tag }],
+        tags: [{ label: tagLabel, installed: true }],
         categories: [],
-        installed: [tag],
+      };
+    }
+  }
+  for (const download of Object.values(downloads)) {
+    let [name, tagLabel] = download.name.split(":");
+    if (!tagLabel) tagLabel = "latest";
+    const model = models[name];
+    const completed = Object.values(download.layers).reduce(
+      (total, layer) => total + layer.completed,
+      0,
+    );
+    if (model) {
+      const tag = model.tags.find((t) => t.label === tagLabel);
+      if (tag) Object.assign(tag, { completed, downloading: true });
+      if (model.latestTag && tagLabel === "latest") {
+        const tag = model.tags.find((t) => t.label === model.latestTag);
+        if (tag) Object.assign(tag, { completed, downloading: true });
+      }
+    } else {
+      models[name] = {
+        name,
+        description: "",
+        tags: [{ label: tagLabel, completed, downloading: true }],
+        categories: [],
       };
     }
   }

@@ -1,9 +1,49 @@
 import { fetch } from "@tauri-apps/plugin-http";
-import { Model, ModelInstance } from "../subjects/ModelsSubject";
 
 const origin = "http://localhost:11434";
 const hubOrigin = "https://ollama.com";
 const domParser = new DOMParser();
+
+export interface Model {
+  name: string;
+  description: string;
+  tags: ModelTag[];
+  latestTag?: string;
+  categories: string[];
+}
+
+export interface ModelTag {
+  label: string;
+  size?: string;
+  context?: string;
+  input?: string[];
+  installed?: boolean;
+  completed?: number;
+  downloading?: boolean;
+}
+
+export interface ModelInstance {
+  name: string;
+  model: string;
+  modified_at: string;
+  size: number; // in bytes
+  digest: string;
+  details: {
+    parent_model: string;
+    format: string;
+    family: string;
+    families: string[];
+    parameter_size: string;
+    quantization_level: string;
+  };
+}
+
+export interface Progress {
+  status: string;
+  digest?: string;
+  total?: number;
+  completed?: number;
+}
 
 export async function getInstalledModels(): Promise<ModelInstance[]> {
   const url = new URL("/api/tags", origin);
@@ -11,6 +51,37 @@ export async function getInstalledModels(): Promise<ModelInstance[]> {
   if (!response.ok) throw new Error("Failed to fetch installed models");
   const data = await response.json();
   return data.models;
+}
+
+export async function pullModel(
+  model: string,
+  progressCallback?: (progress: Progress) => any,
+): Promise<void> {
+  const url = new URL("/api/pull", origin);
+  const body = JSON.stringify({ model });
+  const response = await fetch(url, { method: "POST", body });
+  if (!response.body) return;
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let part;
+  while ((part = await reader.read())) {
+    const data = part.value && decoder.decode(part.value);
+    if (!data) continue;
+    try {
+      const object = JSON.parse(data);
+      progressCallback?.(object);
+    } catch (error) {
+      console.error("Failed to parse progress data:", data);
+    }
+    if (part.done) break;
+  }
+}
+
+export async function deleteModel(model: string): Promise<void> {
+  const url = new URL("/api/delete", origin);
+  const body = JSON.stringify({ model });
+  const response = await fetch(url, { method: "DELETE", body });
+  if (!response.ok) throw new Error("Failed to delete model");
 }
 
 export async function getAvailableModels(): Promise<Model[]> {

@@ -17,6 +17,27 @@ modal-window-element.models > .window {
           align-items: flex-end;
           gap: 8px;
         }
+        .spinner {
+          width: 32px;
+          height: 32px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          stroke: var(--foreground);
+          svg {
+            width: 20px;
+            height: 20px;
+          }
+        }
+        button.action {
+          background: var(--background-2s);
+          width: 32px;
+          height: 32px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          border-radius: 8px;
+        }
       }
     }
     .center {
