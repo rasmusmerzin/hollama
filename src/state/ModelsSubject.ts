@@ -8,10 +8,17 @@ import {
 export interface Model {
   name: string;
   description: string;
-  tags: string[];
+  tags: ModelTag[];
   latestTag?: string;
   categories: string[];
   installed?: string[];
+}
+
+export interface ModelTag {
+  label: string;
+  size?: string;
+  context?: string;
+  input?: string[];
 }
 
 export interface ModelInstance {
@@ -57,45 +64,69 @@ AvailableModelsSubject.subscribe((data) => {
 InstalledModelsSubject.subscribe((models) => {
   localStorage.setItem("installed_models", JSON.stringify(models));
   ModelsSubject.next(constructModels());
-  fetchInstalledModelsDetails();
+  fetchMissingDetailsForInstalled();
 }, null);
 ModelDetailsSubject.subscribe((details) => {
   localStorage.setItem("models_details", JSON.stringify(details));
   ModelsSubject.next(constructModels());
 }, null);
 
-fetchAvailableModels();
-fetchInstalledModels();
+syncAvailableModels({ retryInterval: 2_000 });
+syncInstalledModels({ interval: 2_000 });
 
-async function fetchAvailableModels() {
+export async function syncModelDetails(name: string) {
+  const current = ModelDetailsSubject.current()[name];
+  const model = await getModelDetails(name);
+  if (JSON.stringify(current) === JSON.stringify(model)) return;
+  ModelDetailsSubject.update((current) => ({
+    ...current,
+    [model.name]: model,
+  }));
+}
+
+export async function syncAvailableModels({
+  retryInterval = 0,
+  retryCount = -1,
+} = {}) {
   try {
     const models = await getAvailableModels();
     const data = JSON.stringify(models);
     if (data !== AvailableModelsSubject.current())
       AvailableModelsSubject.next(data);
   } catch (error) {
-    setTimeout(fetchAvailableModels, 10_000);
+    if (retryInterval > 0 && retryCount !== 0) {
+      if (retryCount > 0) retryCount--;
+      setTimeout(syncAvailableModels, retryInterval, {
+        retryInterval,
+        retryCount,
+      });
+    }
   }
 }
 
-async function fetchInstalledModels() {
+export async function syncInstalledModels({ interval = 0 } = {}) {
   try {
     const instances = await getInstalledModels();
     const newData = JSON.stringify(instances);
     const currentData = JSON.stringify(InstalledModelsSubject.current());
     if (newData !== currentData) InstalledModelsSubject.next(instances);
   } finally {
-    setTimeout(fetchInstalledModels, 10_000);
+    if (interval > 0) setTimeout(syncInstalledModels, interval, { interval });
   }
 }
 
-async function fetchInstalledModelsDetails() {
-  const instances = InstalledModelsSubject.current();
-  const details = await Promise.allSettled(
-    instances.map((instance) => getModelDetails(instance.name.split(":")[0])),
+async function fetchMissingDetailsForInstalled() {
+  const current = ModelDetailsSubject.current();
+  const installed = new Set(
+    InstalledModelsSubject.current()
+      .map((instance) => instance.name.split(":")[0])
+      .filter((name) => !current[name]),
+  );
+  const updates = await Promise.allSettled(
+    Array.from(installed, (name) => getModelDetails(name)),
   );
   const updateObject: Record<string, Model> = Object.fromEntries(
-    details
+    updates
       .filter((result) => result.status === "fulfilled")
       .map((result) => [result.value.name, result.value]),
   );
@@ -105,11 +136,12 @@ async function fetchInstalledModelsDetails() {
 
 function constructModels(): Record<string, Model> {
   const available: Model[] = JSON.parse(AvailableModelsSubject.current());
-  const models = Object.fromEntries(
-    available.map((model) => [model.name, model]),
+  const details = ModelDetailsSubject.current();
+  const models = Object.assign(
+    Object.fromEntries(available.map((model) => [model.name, model])),
+    details,
   );
   const installed = InstalledModelsSubject.current();
-  const details = ModelDetailsSubject.current();
   for (const instance of installed) {
     let [name, tag] = instance.name.split(":");
     const { latestTag } = details[name] || {};
@@ -126,7 +158,7 @@ function constructModels(): Record<string, Model> {
       models[name] = {
         name,
         description: "",
-        tags: [tag],
+        tags: [{ label: tag }],
         categories: [],
         installed: [tag],
       };

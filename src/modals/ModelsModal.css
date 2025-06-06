@@ -1,5 +1,26 @@
-modal-window-element.models .content {
-  > .info {
-    text-align: center;
+modal-window-element.models > .window {
+  > .container {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    > modal-window-body-element {
+      position: absolute;
+      transition: opacity 200ms;
+      &.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+      &.details > .content {
+        > .name {
+          margin-bottom: 0.5em;
+          display: flex;
+          align-items: flex-end;
+          gap: 8px;
+        }
+      }
+    }
+    .center {
+      text-align: center;
+    }
   }
 }
