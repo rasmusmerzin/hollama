@@ -22,7 +22,8 @@ export class SideBarElement extends HTMLElement {
         "div",
         {
           className: "title",
-          onmousedown: () => this.appWindow.startDragging(),
+          onmousedown: (event) =>
+            !event.button && this.appWindow.startDragging(),
         },
         [
           createElement("div", { className: "left" }, [

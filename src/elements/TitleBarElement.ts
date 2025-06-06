@@ -12,7 +12,8 @@ export class TitleBarElement extends HTMLElement {
 
   constructor() {
     super();
-    this.onmousedown = () => this.appWindow.startDragging();
+    this.onmousedown = (event) =>
+      !event.button && this.appWindow.startDragging();
     this.replaceChildren(
       createElement("div", { className: "left" }, [
         (this.dockButton = createElement("button", {

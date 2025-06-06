@@ -88,7 +88,7 @@ export class ModalWindowTitleBarElement extends HTMLElement {
     this.control = new AbortController();
     this.addEventListener(
       "mousedown",
-      () => this.appWindow.startDragging(),
+      (event) => !event.button && this.appWindow.startDragging(),
       this.control,
     );
     onDoubleClick(

@@ -25,6 +25,10 @@ addEventListener("keydown", ({ key }) => {
   if (key === "Escape") history.back();
 });
 
+addEventListener("contextmenu", (event) => {
+  event.preventDefault();
+});
+
 defineRoute("#preferences", PreferencesModal);
 defineRoute("#about", AboutModal);
 
