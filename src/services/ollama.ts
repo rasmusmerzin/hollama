@@ -30,10 +30,9 @@ export async function getAvailableModels(): Promise<Model[]> {
     const name =
       anchor?.href?.substring(anchor.href.lastIndexOf("/") + 1) || "";
     const description = descriptionElement?.innerText.trim() || "";
-    const tags = Array.from(
-      sizeElements,
-      (e) => e.textContent?.trim() || "",
-    ).filter(Boolean);
+    const tags = Array.from(sizeElements, (e) => e.textContent?.trim() || "")
+      .filter(Boolean)
+      .map((label) => ({ label }));
     const categories = Array.from(
       capabilityElements,
       (e) => e.textContent?.trim() || "",
@@ -51,23 +50,33 @@ export async function getModelDetails(model: string): Promise<Model> {
   doc.querySelectorAll("script").forEach((s) => s.remove());
   const name =
     doc.querySelector("[x-test-model-name]")?.textContent?.trim() || "";
-  const summaryElement = doc.getElementById("summary");
-  const description = summaryElement?.textContent?.trim() || "";
+  const description =
+    doc.getElementById("summary-content")?.textContent?.trim() || "";
   const categories = Array.from(
-    summaryElement?.nextElementSibling?.children || [],
+    doc.getElementById("summary")?.nextElementSibling?.children || [],
   )
     .filter((e) => !e.hasAttribute("x-test-size"))
     .map((e) => e.textContent?.trim() || "")
     .filter(Boolean);
-  const anchors = doc.querySelectorAll("a");
+  const anchors = Array.from(
+    doc.querySelector("section")?.querySelectorAll("a") || [],
+  ).filter((a) => !a.classList.contains("sm:hidden"));
   let latestTag: string | undefined;
-  const tags = Array.from(anchors, (a) => {
-    const [_name, tag] = a.href
-      .substring(a.href.lastIndexOf("/") + 1)
-      .split(":");
-    if (a.nextElementSibling?.textContent?.trim().toLowerCase() === "latest")
-      latestTag = tag;
-    return tag;
-  });
+  const tags = anchors
+    .map((a) => {
+      const [_, sizeElement, contextElement, inputElement] =
+        a.parentNode?.parentNode?.children || [];
+      const [_modelName, label] = a.href
+        .substring(a.href.lastIndexOf("/") + 1)
+        .split(":");
+      if (a.nextElementSibling?.textContent?.trim().toLowerCase() === "latest")
+        latestTag = label;
+      const size = sizeElement?.textContent?.trim();
+      const context = contextElement?.textContent?.trim();
+      const input =
+        inputElement?.textContent?.trim().replace(/\s+/g, " ").split(",") || [];
+      return { label, size, context, input };
+    })
+    .filter(({ label }) => label && label !== "latest");
   return { name, description, tags, latestTag, categories };
 }
