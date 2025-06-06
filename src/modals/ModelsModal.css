@@ -1,0 +1,5 @@
+modal-window-element.models .content {
+  > .info {
+    text-align: center;
+  }
+}
