@@ -2,11 +2,12 @@ import "./AboutModal.css";
 import { ModalWindowBodyElement } from "../elements/ModalWindowBodyElement";
 import { ModalWindowElement } from "../elements/ModalWindowElement";
 import { ModalWindowTitleBarElement } from "../elements/ModalWindowTitleBarElement";
+import { TagElement } from "../elements/TagElement";
 import { getVersion } from "@tauri-apps/api/app";
 
 export function AboutModal() {
-  let versionButton = createElement("button", {
-    className: "version",
+  let versionButton = createElement(TagElement, {
+    height: 28,
     onclick: () => navigator.clipboard.writeText(versionButton.innerText),
   });
   getVersion().then((version) => (versionButton.innerText = version));

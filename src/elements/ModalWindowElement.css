@@ -60,11 +60,11 @@ modal-window-element[state="opening"] {
 }
 
 modal-window-element[state="closing"] {
-  animation: modal-window-background-out 200ms;
+  animation: modal-window-background-out 200ms forwards;
   > .window {
-    animation: modal-window-scale-out 200ms ease-in-out;
+    animation: modal-window-scale-out 200ms ease-in-out forwards;
     @media (max-width: 440px) {
-      animation: modal-window-slide-out 200ms;
+      animation: modal-window-slide-out 200ms forwards;
     }
   }
 }
