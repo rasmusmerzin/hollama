@@ -3,9 +3,9 @@ tag-element {
   user-select: none;
   line-height: 1;
   word-break: keep-all;
-  font-size: calc(var(--height) * 0.7px);
+  font-size: calc(var(--height) * 0.6px);
   height: calc(var(--height) * 1px);
-  padding: 0 calc(var(--height) * 0.3px);
+  padding: 0 calc(var(--height) * 0.4px);
   border-radius: calc(var(--height) * 0.5px);
   display: inline-flex;
   justify-content: center;
@@ -21,9 +21,12 @@ tag-element {
     bottom: 0;
     border-radius: inherit;
     background: var(--foreground);
-    opacity: 0.2;
+    opacity: 0.1;
+  }
+  &:not([disabled]) {
+    font-weight: bold;
   }
   &[disabled] {
-    opacity: 0.5;
+    opacity: 0.7;
   }
 }

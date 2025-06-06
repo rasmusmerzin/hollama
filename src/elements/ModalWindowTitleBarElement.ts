@@ -1,14 +1,16 @@
 import "./ModalWindowTitleBarElement.css";
-import { ICON_CLOSE, ICON_SEARCH } from "../icons";
+import { ICON_CHEVRON_LEFT, ICON_CLOSE, ICON_SEARCH } from "../icons";
 import { TextInputElement } from "./TextInputElement";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { onDoubleClick } from "../onDoubleClick";
+import { stripObject } from "../stripObject";
 
 @tag("modal-window-title-bar-element")
 export class ModalWindowTitleBarElement extends HTMLElement {
   private appWindow = getCurrentWindow();
   private centerElement: HTMLDivElement;
   private searchButton: HTMLButtonElement;
+  private submodalElement: HTMLElement;
   private searchInput: TextInputElement;
   private control?: AbortController;
 
@@ -41,6 +43,12 @@ export class ModalWindowTitleBarElement extends HTMLElement {
           onmousedown: stopPropagation,
           onclick: this.toggleSearch.bind(this),
         })),
+        createElement("button", {
+          className: "back",
+          innerHTML: ICON_CHEVRON_LEFT,
+          onmousedown: stopPropagation,
+          onclick: () => history.back(),
+        }),
       ]),
       (this.centerElement = createElement("div", {
         className: "center",
@@ -71,6 +79,7 @@ export class ModalWindowTitleBarElement extends HTMLElement {
           onclick: () => history.go(-1 - (history.state.modalIndex || 0)),
         }),
       ]),
+      (this.submodalElement = createElement("div", { className: "submodal" })),
     );
   }
 
@@ -104,24 +113,30 @@ export class ModalWindowTitleBarElement extends HTMLElement {
     if (history.state.searching != null) history.back();
     else {
       const modalIndex = (history.state.modalIndex || 0) + 1;
-      history.pushState({ ...history.state, searching: "", modalIndex }, "");
+      history.pushState(
+        { ...stripObject(history.state), searching: "", modalIndex },
+        "",
+      );
     }
   }
 
   private onStateChange() {
-    const { state } = history;
-    if (state.searching != null) {
-      this.setAttribute("searching", state.searching);
-      this.searchInput.value = state.searching;
+    const { searching, submodal } = history.state;
+    if (submodal != null) {
+      this.setAttribute("submodal", submodal);
+      this.submodalElement.innerText = submodal;
+    } else this.removeAttribute("submodal");
+    if (searching != null) {
+      this.setAttribute("searching", searching);
+      this.searchInput.value = searching;
       this.searchInput.focus();
       this.searchButton.classList.add("active");
-      this.onsearch?.(state.searching);
     } else {
       this.removeAttribute("searching");
       this.searchInput.value = "";
       this.searchButton.classList.remove("active");
-      this.onsearch?.(null);
     }
+    this.onsearch?.(searching || null);
   }
 }
 

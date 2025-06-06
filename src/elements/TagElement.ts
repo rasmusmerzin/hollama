@@ -18,6 +18,6 @@ export class TagElement extends HTMLElement {
 
   constructor() {
     super();
-    this.height = 16;
+    this.height = 18;
   }
 }

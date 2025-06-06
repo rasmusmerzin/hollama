@@ -4,6 +4,7 @@ import { ICON_ADD_CHAT, ICON_MENU } from "../icons";
 import { SideBarSubject } from "../subjects/SideBarSubject";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { onDoubleClick } from "../onDoubleClick";
+import { stripObject } from "../stripObject";
 
 export const SIDE_BAR_BREAKPOINT = 560;
 
@@ -59,9 +60,13 @@ export class SideBarElement extends HTMLElement {
       if (open) this.classList.add("open");
       else this.classList.remove("open");
       const { sidebarOverlay } = history.state;
-      if (previous?.open !== open) {
+      if (!previous) return;
+      if (previous.open !== open) {
         if (open && innerWidth < SIDE_BAR_BREAKPOINT && !sidebarOverlay)
-          history.pushState({ ...history.state, sidebarOverlay: true }, "");
+          history.pushState(
+            { ...stripObject(history.state), sidebarOverlay: true },
+            "",
+          );
         else if (!open && sidebarOverlay) history.back();
       }
     }, this.control);
@@ -102,16 +107,19 @@ export class SideBarElement extends HTMLElement {
         items: [
           {
             label: "Models",
-            action: () => history.pushState(history.state, "", "#models"),
+            action: () =>
+              history.pushState(stripObject(history.state), "", "#models"),
           },
           "div",
           {
             label: "Preferences",
-            action: () => history.pushState(history.state, "", "#preferences"),
+            action: () =>
+              history.pushState(stripObject(history.state), "", "#preferences"),
           },
           {
             label: "About Hollama",
-            action: () => history.pushState(history.state, "", "#about"),
+            action: () =>
+              history.pushState(stripObject(history.state), "", "#about"),
           },
         ],
       }),
@@ -120,6 +128,7 @@ export class SideBarElement extends HTMLElement {
 
   private previousWidth = innerWidth;
   private onResize() {
+    if (location.hash) return;
     if (
       this.previousWidth < SIDE_BAR_BREAKPOINT &&
       innerWidth >= SIDE_BAR_BREAKPOINT

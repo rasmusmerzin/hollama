@@ -7,6 +7,7 @@ modal-window-title-bar-element {
   user-select: none;
   -webkit-user-select: none;
   position: relative;
+  > .submodal,
   > .search {
     position: absolute;
     top: 0;
@@ -21,6 +22,8 @@ modal-window-title-bar-element {
     display: flex;
     justify-content: center;
     align-items: center;
+    font-weight: 1.2rem;
+    font-weight: bold;
   }
   > .left {
     flex: 1;
@@ -60,10 +63,26 @@ modal-window-title-bar-element {
       }
     }
   }
-  &:not([searchable]) button.search {
-    display: none;
+  button.back svg {
+    width: 28px;
+    height: 28px;
+  }
+  &[submodal],
+  &:not([searchable]) {
+    button.search {
+      display: none;
+    }
+  }
+  &:not([submodal]) {
+    button.back {
+      display: none;
+    }
   }
   &[searching] > .search {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  &[submodal] > .submodal {
     opacity: 1;
     pointer-events: auto;
   }
