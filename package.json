@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@merzin/element": "0.2",
-    "@merzin/router": "0.5",
+    "@merzin/router": "0.5.3",
     "@tauri-apps/api": "2",
     "@tauri-apps/plugin-http": "^2.4.4",
     "@tauri-apps/plugin-opener": "2"
