@@ -20,6 +20,7 @@ modal-window-element {
     position: relative;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
     @media (min-height: 532px) {
       max-height: calc(100% - 12vh);
     }

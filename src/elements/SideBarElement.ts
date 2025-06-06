@@ -4,7 +4,6 @@ import { ICON_ADD_CHAT, ICON_MENU } from "../icons";
 import { SideBarSubject } from "../subjects/SideBarSubject";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { onDoubleClick } from "../onDoubleClick";
-import { onBack } from "@merzin/router";
 
 export const SIDE_BAR_BREAKPOINT = 560;
 
@@ -14,7 +13,6 @@ export class SideBarElement extends HTMLElement {
   private menuButton: HTMLButtonElement;
   private titleElement: HTMLDivElement;
   private control?: AbortController;
-  private backHandler = false;
 
   constructor() {
     super();
@@ -57,35 +55,42 @@ export class SideBarElement extends HTMLElement {
       ...state,
       open: innerWidth >= SIDE_BAR_BREAKPOINT,
     }));
-    let previousOpen = SideBarSubject.current().open;
-    SideBarSubject.subscribe(({ open }) => {
+    SideBarSubject.subscribe(({ open }, previous) => {
       if (open) this.classList.add("open");
       else this.classList.remove("open");
-      if (previousOpen !== open) {
-        if (open && innerWidth < SIDE_BAR_BREAKPOINT && !this.backHandler) {
-          this.backHandler = true;
-          onBack(() => {
-            this.backHandler = false;
-            if (
-              SideBarSubject.current().open &&
-              innerWidth < SIDE_BAR_BREAKPOINT
-            )
-              SideBarSubject.update((state) => ({ ...state, open: false }));
-          });
-        } else if (!open && this.backHandler) history.back();
+      const { sidebarOverlay } = history.state;
+      if (previous?.open !== open) {
+        if (open && innerWidth < SIDE_BAR_BREAKPOINT && !sidebarOverlay)
+          history.pushState({ ...history.state, sidebarOverlay: true }, "");
+        else if (!open && sidebarOverlay) history.back();
       }
     }, this.control);
+    this.onStateChange();
     addEventListener("resize", this.onResize.bind(this), this.control);
     onDoubleClick(
       this.titleElement,
       () => this.appWindow.toggleMaximize(),
       this.control.signal,
     );
+    addEventListener(
+      "statechange",
+      this.onStateChange.bind(this),
+      this.control,
+    );
   }
 
   disconnectedCallback() {
     this.control?.abort();
     delete this.control;
+  }
+
+  private onStateChange() {
+    const { open } = SideBarSubject.current();
+    const { sidebarOverlay } = history.state;
+    if (sidebarOverlay && !open)
+      SideBarSubject.update((state) => ({ ...state, open: true }));
+    else if (!sidebarOverlay && innerWidth < SIDE_BAR_BREAKPOINT && open)
+      SideBarSubject.update((state) => ({ ...state, open: false }));
   }
 
   private openDropdownMenu() {
@@ -95,15 +100,18 @@ export class SideBarElement extends HTMLElement {
         anchor: this.menuButton,
         ondisconnect: () => this.menuButton.classList.remove("active"),
         items: [
-          { label: "Models" },
+          {
+            label: "Models",
+            action: () => history.pushState(history.state, "", "#models"),
+          },
           "div",
           {
             label: "Preferences",
-            action: () => history.pushState({}, "", "#preferences"),
+            action: () => history.pushState(history.state, "", "#preferences"),
           },
           {
             label: "About Hollama",
-            action: () => history.pushState({}, "", "#about"),
+            action: () => history.pushState(history.state, "", "#about"),
           },
         ],
       }),
@@ -116,7 +124,7 @@ export class SideBarElement extends HTMLElement {
       this.previousWidth < SIDE_BAR_BREAKPOINT &&
       innerWidth >= SIDE_BAR_BREAKPOINT
     ) {
-      if (this.backHandler) history.back();
+      if (history.state.sidebarOverlay) history.back();
       if (!SideBarSubject.current().open)
         SideBarSubject.update((state) => ({ ...state, open: true }));
     } else if (

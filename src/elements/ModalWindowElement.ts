@@ -88,7 +88,8 @@ export class ModalWindowElement extends HTMLElement {
   }
 
   private onMousedown() {
-    if (innerWidth < MODAL_WINDOW_BREAKPOINT) history.back();
+    if (innerWidth < MODAL_WINDOW_BREAKPOINT)
+      history.go(-1 - (history.state.modalIndex || 0));
     else this.appWindow.startDragging();
   }
 

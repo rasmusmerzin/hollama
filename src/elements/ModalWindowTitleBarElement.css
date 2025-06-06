@@ -1,16 +1,33 @@
 modal-window-title-bar-element {
   flex-shrink: 0;
   display: flex;
-  height: 40px;
+  height: 44px;
   align-items: center;
-  padding: 4px;
+  padding: 6px;
   user-select: none;
   -webkit-user-select: none;
+  position: relative;
+  > .search {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--background-1s);
+    pointer-events: none;
+    opacity: 0;
+    padding: 6px 44px 6px 44px;
+    transition: opacity 200ms;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
   > .left {
     flex: 1;
     display: flex;
   }
   > .center {
+    font-weight: 1.2rem;
     font-weight: bold;
   }
   > .right {
@@ -18,24 +35,36 @@ modal-window-title-bar-element {
     display: flex;
     justify-content: flex-end;
   }
-  button {
-    width: 32px;
-    height: 32px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 8px;
-    background: var(--background-1s);
-    &.circle {
-      border-radius: 100%;
-      transform: scale(0.75);
+  > .right,
+  > .left {
+    > button {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 8px;
+      background: var(--background-1s);
+      position: relative;
+      z-index: 1;
+      &.circle {
+        border-radius: 100%;
+        transform: scale(0.75);
+      }
+      &.active {
+        background: var(--background-2b);
+      }
+      svg {
+        width: 20px;
+        height: 20px;
+      }
     }
-    &.active {
-      background: var(--background-2b);
-    }
-    svg {
-      width: 20px;
-      height: 20px;
-    }
+  }
+  &:not([searchable]) button.search {
+    display: none;
+  }
+  &[searching] > .search {
+    opacity: 1;
+    pointer-events: auto;
   }
 }

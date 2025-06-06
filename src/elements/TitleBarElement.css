@@ -1,15 +1,19 @@
 title-bar-element {
   display: flex;
-  height: 40px;
+  height: 44px;
   align-items: center;
-  padding: 4px;
+  padding: 6px;
   user-select: none;
   -webkit-user-select: none;
-  .left {
+  > .left {
     flex: 1;
     display: flex;
   }
-  .right {
+  > .center {
+    font-weight: 1.2rem;
+    font-weight: bold;
+  }
+  > .right {
     flex: 1;
     display: flex;
     justify-content: flex-end;

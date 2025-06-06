@@ -11,6 +11,7 @@ export class DropdownMenuElement extends HTMLElement {
   private containerElement: HTMLDivElement;
   private control?: AbortController;
 
+  onconnect: (() => any) | null = null;
   ondisconnect: (() => any) | null = null;
 
   #anchor: HTMLElement | null = null;
@@ -61,6 +62,7 @@ export class DropdownMenuElement extends HTMLElement {
     this.control = new AbortController();
     onBack(this.remove.bind(this));
     addEventListener("resize", () => history.back(), this.control);
+    this.onconnect?.();
   }
 
   disconnectedCallback() {
