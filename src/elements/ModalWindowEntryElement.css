@@ -7,6 +7,7 @@ modal-window-entry-element {
   height: calc(var(--height) * 1px);
   padding: 12px;
   display: flex;
+  gap: 8px;
   align-items: center;
   justify-content: space-between;
   user-select: none;
