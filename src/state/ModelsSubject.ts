@@ -37,7 +37,7 @@ const InstalledModelsSubject = new Subject<ModelInstance[]>(
 );
 const ModelDownloadsSubject = new Subject<Record<string, ModelDownload>>({});
 
-const updateModelsSubjectThrottled = throttle(updateModelsSubject, 2000);
+const updateModelsSubjectThrottled = throttle(updateModelsSubject, 1000);
 
 AvailableModelsSubject.subscribe((data) => {
   localStorage.setItem("available_models", data);
@@ -55,37 +55,27 @@ ModelDetailsSubject.subscribe((details) => {
 }, null);
 ModelDownloadsSubject.subscribe(updateModelsSubjectThrottled, null);
 
-syncAvailableModels({ retryInterval: 2_000 });
-syncInstalledModels({ interval: 2_000 });
+syncAvailableModels({ retryInterval: 5000 });
+syncInstalledModels({ interval: 5000 });
 
-export function startModelDownload(name: string): Promise<boolean> {
+export function startModelDownload(name: string): Promise<void> {
   const download = ModelDownloadsSubject.current()[name] || {
     name,
     layers: {},
   };
   return new Promise((resolve, reject) =>
     pullModel(name, async ({ status, digest, total, completed }) => {
-      resolve(true);
-      if (status === "success") {
-        try {
-          await syncInstalledModels();
-        } finally {
-          ModelDownloadsSubject.update((downloads) => {
-            delete downloads[name];
-            return downloads;
-          });
-        }
-      } else {
-        if (digest && total && completed)
-          download.layers[digest] = { total, completed };
-        Object.assign(download, { status });
-        ModelDownloadsSubject.update((downloads) => {
-          downloads[name] = download;
-          return downloads;
-        });
-      }
+      resolve();
+      if (digest && total && completed)
+        download.layers[digest] = { total, completed };
+      Object.assign(download, { status });
+      ModelDownloadsSubject.update((downloads) => {
+        downloads[name] = download;
+        return downloads;
+      });
+      if (status === "success") syncInstalledModels();
     })
-      .then(() => resolve(true))
+      .then(() => resolve())
       .catch(reject),
   );
 }
@@ -208,22 +198,22 @@ function constructModels(): Record<string, Model> {
     let [name, tagLabel] = download.name.split(":");
     if (!tagLabel) tagLabel = "latest";
     const model = models[name];
-    const completed = Object.values(download.layers).reduce(
+    const downloaded = Object.values(download.layers).reduce(
       (total, layer) => total + layer.completed,
       0,
     );
     if (model) {
       const tag = model.tags.find((t) => t.label === tagLabel);
-      if (tag) Object.assign(tag, { completed, downloading: true });
+      if (tag) Object.assign(tag, { downloaded });
       if (model.latestTag && tagLabel === "latest") {
         const tag = model.tags.find((t) => t.label === model.latestTag);
-        if (tag) Object.assign(tag, { completed, downloading: true });
+        if (tag) Object.assign(tag, { downloaded });
       }
     } else {
       models[name] = {
         name,
         description: "",
-        tags: [{ label: tagLabel, completed, downloading: true }],
+        tags: [{ label: tagLabel, downloaded }],
         categories: [],
       };
     }

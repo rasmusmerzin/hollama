@@ -1,4 +1,5 @@
-import { fetch } from "@tauri-apps/plugin-http";
+import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
+import { parseBytes } from "../bytes";
 
 const origin = "http://localhost:11434";
 const hubOrigin = "https://ollama.com";
@@ -14,12 +15,11 @@ export interface Model {
 
 export interface ModelTag {
   label: string;
-  size?: string;
+  size?: number; // in bytes
   context?: string;
   input?: string[];
   installed?: boolean;
-  completed?: number;
-  downloading?: boolean;
+  downloaded?: number;
 }
 
 export interface ModelInstance {
@@ -58,22 +58,37 @@ export async function pullModel(
   progressCallback?: (progress: Progress) => any,
 ): Promise<void> {
   const url = new URL("/api/pull", origin);
-  const body = JSON.stringify({ model });
+  const stream = !!progressCallback;
+  const body = JSON.stringify({ model, stream });
   const response = await fetch(url, { method: "POST", body });
-  if (!response.body) return;
-  const reader = response.body.getReader();
+  if (progressCallback) {
+    if (!response.body) return;
+    const reader = response.body.getReader();
+    await readStreamAsJson(reader, progressCallback);
+  } else await response.text();
+}
+
+async function readStreamAsJson<T extends object>(
+  reader: ReadableStreamDefaultReader,
+  callback: (item: T) => any,
+): Promise<void> {
   const decoder = new TextDecoder();
-  let part;
-  while ((part = await reader.read())) {
-    const data = part.value && decoder.decode(part.value);
-    if (!data) continue;
-    try {
-      const object = JSON.parse(data);
-      progressCallback?.(object);
-    } catch (error) {
-      console.error("Failed to parse progress data:", data);
+  let buffer = "";
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    let boundary;
+    while ((boundary = buffer.indexOf("}\n")) !== -1) {
+      const jsonStr = buffer.substring(0, boundary + 1);
+      buffer = buffer.substring(boundary + 2);
+      try {
+        const object = JSON.parse(jsonStr);
+        setTimeout(callback, 0, object);
+      } catch (error) {
+        console.error("Error parsing progress data:", jsonStr);
+      }
     }
-    if (part.done) break;
   }
 }
 
@@ -86,7 +101,7 @@ export async function deleteModel(model: string): Promise<void> {
 
 export async function getAvailableModels(): Promise<Model[]> {
   const url = new URL("/search", hubOrigin);
-  const response = await fetch(url);
+  const response = await tauriFetch(url);
   if (!response.ok) throw new Error("Failed to fetch available models");
   const html = await response.text();
   const doc = domParser.parseFromString(html, "text/html");
@@ -114,7 +129,7 @@ export async function getAvailableModels(): Promise<Model[]> {
 
 export async function getModelDetails(model: string): Promise<Model> {
   const url = new URL(`/library/${model}`, hubOrigin);
-  const response = await fetch(url);
+  const response = await tauriFetch(url);
   if (!response.ok) throw new Error("Failed to fetch model details");
   const html = await response.text();
   const doc = domParser.parseFromString(html, "text/html");
@@ -134,20 +149,27 @@ export async function getModelDetails(model: string): Promise<Model> {
   ).filter((a) => !a.classList.contains("sm:hidden"));
   let latestTag: string | undefined;
   const tags = anchors
-    .map((a) => {
+    .map((a): ModelTag => {
       const [_, sizeElement, contextElement, inputElement] =
         a.parentNode?.parentNode?.children || [];
       const [_modelName, label] = a.href
         .substring(a.href.lastIndexOf("/") + 1)
         .split(":");
+      if (!label || label === "latest") return null!;
       if (a.nextElementSibling?.textContent?.trim().toLowerCase() === "latest")
         latestTag = label;
-      const size = sizeElement?.textContent?.trim();
+      let size: number | undefined;
+      try {
+        const sizeStr = sizeElement?.textContent?.trim();
+        if (sizeStr) size = parseBytes(sizeStr);
+      } catch (error) {
+        console.error(error);
+      }
       const context = contextElement?.textContent?.trim();
       const input =
         inputElement?.textContent?.trim().replace(/\s+/g, " ").split(",") || [];
       return { label, size, context, input };
     })
-    .filter(({ label }) => label && label !== "latest");
+    .filter(Boolean);
   return { name, description, tags, latestTag, categories };
 }

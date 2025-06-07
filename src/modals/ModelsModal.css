@@ -11,23 +11,13 @@ modal-window-element.models > .window {
         pointer-events: none;
       }
       &.details > .content {
+        -webkit-user-select: none;
+        user-select: none;
         > .name {
           margin-bottom: 0.5em;
           display: flex;
           align-items: flex-end;
           gap: 8px;
-        }
-        .spinner {
-          width: 32px;
-          height: 32px;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          stroke: var(--foreground);
-          svg {
-            width: 20px;
-            height: 20px;
-          }
         }
         button.action {
           background: var(--background-2s);
@@ -42,6 +32,19 @@ modal-window-element.models > .window {
     }
     .center {
       text-align: center;
+    }
+  }
+  .spinner {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    stroke: var(--foreground);
+    svg {
+      width: 20px;
+      height: 20px;
     }
   }
 }

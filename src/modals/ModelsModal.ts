@@ -1,5 +1,5 @@
 import "./ModelsModal.css";
-import { ICON_DELETE, ICON_DOWNLOAD, ICON_SPINNER } from "../icons";
+import { ICON_DELETE, ICON_DOWNLOAD, iconProgress } from "../icons";
 import { ModalWindowBodyElement } from "../elements/ModalWindowBodyElement";
 import { ModalWindowElement } from "../elements/ModalWindowElement";
 import { ModalWindowEntryElement } from "../elements/ModalWindowEntryElement";
@@ -15,7 +15,7 @@ import {
 import { TagElement } from "../elements/TagElement";
 import { stripObject } from "../stripObject";
 import { throttle } from "../throttle";
-import { formatByteCount } from "../formatByteCount";
+import { formatBytes } from "../bytes";
 
 export function ModelsModal() {
   let listBody: ModalWindowBodyElement;
@@ -89,7 +89,8 @@ export function ModelsModal() {
     const installed: Model[] = [];
     const available: Model[] = [];
     for (const model of models) {
-      if (model.tags.some((tag) => tag.downloading)) downloading.push(model);
+      if (model.tags.some((tag) => tag.downloaded != null))
+        downloading.push(model);
       else if (model.tags.some((tag) => tag.installed)) installed.push(model);
       else available.push(model);
     }
@@ -145,9 +146,9 @@ export function ModelsModal() {
                   height: 64,
                   label: `${model.name}:${tag.label}`,
                   description: [
-                    tag.size && tag.completed != null
-                      ? `${formatByteCount(tag.completed)}/${tag.size}`
-                      : tag.size,
+                    tag.size && tag.downloaded != null
+                      ? `${formatBytes(tag.downloaded)}/${formatBytes(tag.size)}`
+                      : tag.size && formatBytes(tag.size),
                     tag.context,
                     tag.input?.join(", "),
                   ]
@@ -158,10 +159,10 @@ export function ModelsModal() {
                     ...(i < model.tags.length - 1 ? ["bottom"] : []),
                   ].join(" "),
                 },
-                tag.downloading
+                tag.downloaded != null
                   ? createElement("div", {
                       className: "spinner",
-                      innerHTML: ICON_SPINNER,
+                      innerHTML: iconProgress(tag.downloaded / (tag.size || 1)),
                     })
                   : tag.installed
                     ? createElement("button", {
@@ -184,8 +185,29 @@ export function ModelsModal() {
   }
 
   function constructModelEntries(models: Model[]) {
-    return models.map((model, i) =>
-      createElement(ModalWindowEntryElement, {
+    return models.map(constructModelEntry);
+  }
+
+  function constructModelEntry(model: Model, i: number, models: Model[]) {
+    const inProgressTags = model.tags.filter(
+      (tag) => tag.downloaded != null && tag.size != null,
+    ) as { downloaded: number; size: number }[];
+    const progress = inProgressTags.length
+      ? (() => {
+          const totalSize = inProgressTags.reduce(
+            (state, item) => state + item.size,
+            0,
+          );
+          const totalDownloaded = inProgressTags.reduce(
+            (state, item) => state + item.downloaded,
+            0,
+          );
+          return totalDownloaded / (totalSize || 1);
+        })()
+      : null;
+    return createElement(
+      ModalWindowEntryElement,
+      {
         label: createElement(
           "div",
           { style: "display: flex; align-items: center; gap: 4px;" },
@@ -198,7 +220,7 @@ export function ModelsModal() {
             ...model.tags.map((tag) =>
               createElement(
                 TagElement,
-                { disabled: !tag.installed },
+                { disabled: !tag.installed && tag.downloaded == null },
                 tag.label,
               ),
             ),
@@ -219,7 +241,12 @@ export function ModelsModal() {
             },
             "",
           ),
-      }),
+      },
+      progress != null &&
+        createElement("div", {
+          className: "spinner",
+          innerHTML: iconProgress(progress),
+        }),
     );
   }
 }
