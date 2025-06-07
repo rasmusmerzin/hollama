@@ -1,12 +1,12 @@
 import "./SideBarElement.css";
 import { DropdownMenuElement } from "./DropdownMenuElement";
 import { ICON_ADD_CHAT, ICON_MENU } from "../icons";
-import { SideBarSubject } from "../subjects/SideBarSubject";
+import { SideBarSubject } from "../state/SideBarSubject";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { onDoubleClick } from "../onDoubleClick";
 import { stripObject } from "../stripObject";
 
-export const SIDE_BAR_BREAKPOINT = 560;
+export const SIDE_BAR_BREAKPOINT = 640;
 
 @tag("side-bar-element")
 export class SideBarElement extends HTMLElement {
@@ -97,6 +97,12 @@ export class SideBarElement extends HTMLElement {
       SideBarSubject.update((state) => ({ ...state, open: true }));
     else if (!sidebarOverlay && innerWidth < SIDE_BAR_BREAKPOINT && open)
       SideBarSubject.update((state) => ({ ...state, open: false }));
+    if (
+      history.stack.index === 1 &&
+      sidebarOverlay &&
+      innerWidth >= SIDE_BAR_BREAKPOINT
+    )
+      history.back();
   }
 
   private openDropdownMenu() {
@@ -129,7 +135,7 @@ export class SideBarElement extends HTMLElement {
 
   private previousWidth = innerWidth;
   private onResize() {
-    if (location.hash) return;
+    if (history.stack.index > 1) return;
     if (
       this.previousWidth < SIDE_BAR_BREAKPOINT &&
       innerWidth >= SIDE_BAR_BREAKPOINT

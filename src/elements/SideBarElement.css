@@ -67,7 +67,7 @@ side-bar-element {
       }
     }
   }
-  @media (max-width: 560px) {
+  @media (max-width: 640px) {
     position: absolute;
     top: 0;
     left: 0;
@@ -85,7 +85,7 @@ side-bar-element {
 }
 
 :root:not([dark]) side-bar-element.open {
-  @media (min-width: 560px) {
+  @media (min-width: 640px) {
     border-right: 1px solid #8884;
   }
 }

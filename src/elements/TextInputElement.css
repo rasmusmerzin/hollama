@@ -24,6 +24,9 @@ text-input-element {
     height: 100%;
     border-radius: 8px;
     background: #8883;
+    &::placeholder {
+      color: #888;
+    }
   }
   &[icon] > input {
     padding-left: 32px;
