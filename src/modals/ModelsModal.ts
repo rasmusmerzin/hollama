@@ -1,21 +1,26 @@
 import "./ModelsModal.css";
-import { ICON_DELETE, ICON_DOWNLOAD, iconProgress } from "../icons";
+import {
+  ICON_DELETE,
+  ICON_DOWNLOAD,
+  ICON_SPINNER,
+  iconProgress,
+} from "../icons";
 import { ModalWindowBodyElement } from "../elements/ModalWindowBodyElement";
 import { ModalWindowElement } from "../elements/ModalWindowElement";
 import { ModalWindowEntryElement } from "../elements/ModalWindowEntryElement";
 import { ModalWindowHeaderElement } from "../elements/ModalWindowHeaderElement";
 import { ModalWindowTitleBarElement } from "../elements/ModalWindowTitleBarElement";
-import { Model } from "../services/ollama";
+import { Model } from "../fetch/ollamaHub";
+import { ModelsSubject } from "../state/ModelsSubject";
+import { TagElement } from "../elements/TagElement";
+import { formatBytes } from "../utils/bytes";
 import {
-  ModelsSubject,
   removeModel,
   startModelDownload,
   syncModelDetails,
-} from "../state/ModelsSubject";
-import { TagElement } from "../elements/TagElement";
-import { stripObject } from "../stripObject";
-import { throttle } from "../throttle";
-import { formatBytes } from "../bytes";
+} from "../services/models";
+import { stripObject } from "../utils/stripObject";
+import { throttle } from "../utils/throttle";
 
 export function ModelsModal() {
   let listBody: ModalWindowBodyElement;
@@ -139,8 +144,12 @@ export function ModelsModal() {
       ...(model.tags.length
         ? [
             createElement(ModalWindowHeaderElement, { label: "Tags" }),
-            ...model.tags.map((tag, i) =>
-              createElement(
+            ...model.tags.map((tag, i) => {
+              const progress =
+                tag.downloaded != null
+                  ? tag.downloaded / (tag.size || 1)
+                  : null;
+              return createElement(
                 ModalWindowEntryElement,
                 {
                   height: 64,
@@ -159,10 +168,12 @@ export function ModelsModal() {
                     ...(i < model.tags.length - 1 ? ["bottom"] : []),
                   ].join(" "),
                 },
-                tag.downloaded != null
+                progress != null
                   ? createElement("div", {
                       className: "spinner",
-                      innerHTML: iconProgress(tag.downloaded / (tag.size || 1)),
+                      innerHTML: progress
+                        ? iconProgress(progress)
+                        : ICON_SPINNER,
                     })
                   : tag.installed
                     ? createElement("button", {
@@ -177,8 +188,8 @@ export function ModelsModal() {
                         onclick: () =>
                           startModelDownload(`${model.name}:${tag.label}`),
                       }),
-              ),
-            ),
+              );
+            }),
           ]
         : []),
     );
@@ -245,7 +256,7 @@ export function ModelsModal() {
       progress != null &&
         createElement("div", {
           className: "spinner",
-          innerHTML: iconProgress(progress),
+          innerHTML: progress ? iconProgress(progress) : ICON_SPINNER,
         }),
     );
   }

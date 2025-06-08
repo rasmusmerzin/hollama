@@ -18,12 +18,14 @@ export const PreferencesSubject = new Subject<Preferences>(
   })(),
 );
 
-PreferencesSubject.subscribe((preferences) => {
-  localStorage.setItem("preferences", JSON.stringify(preferences));
-  const { darkMode, smoothCorners } = preferences;
-  if (darkMode) document.documentElement.setAttribute("dark", "");
-  else document.documentElement.removeAttribute("dark");
-  if (smoothCorners)
-    document.documentElement.setAttribute("smooth-corners", "");
-  else document.documentElement.removeAttribute("smooth-corners");
-}, null);
+setTimeout(() => {
+  PreferencesSubject.subscribe((preferences) => {
+    localStorage.setItem("preferences", JSON.stringify(preferences));
+    const { darkMode, smoothCorners } = preferences;
+    if (darkMode) document.documentElement.setAttribute("dark", "");
+    else document.documentElement.removeAttribute("dark");
+    if (smoothCorners)
+      document.documentElement.setAttribute("smooth-corners", "");
+    else document.documentElement.removeAttribute("smooth-corners");
+  }, null);
+});

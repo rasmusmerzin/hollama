@@ -1,14 +1,7 @@
-import {
-  Model,
-  ModelInstance,
-  deleteModel,
-  getAvailableModels,
-  getInstalledModels,
-  getModelDetails,
-  pullModel,
-} from "../services/ollama";
+import { Model, getModelDetails } from "../fetch/ollamaHub";
+import { ModelInstance } from "../fetch/ollamaClient";
 import { Subject } from "./Subject";
-import { throttle } from "../throttle";
+import { throttle } from "../utils/throttle";
 
 export interface ModelDownload {
   name: string;
@@ -18,129 +11,55 @@ export interface ModelDownload {
 
 export const ModelsSubject = new Subject<Record<string, Model>>({});
 
-const ModelDetailsSubject = new Subject<Record<string, Model>>(
+export const ModelDetailsSubject = new Subject<Record<string, Model>>(
   (() => {
     const stored = localStorage.getItem("model_details");
     if (stored) return JSON.parse(stored);
     return {};
   })(),
 );
-const AvailableModelsSubject = new Subject<string>(
+export const AvailableModelsSubject = new Subject<string>(
   localStorage.getItem("available_models") || "[]",
 );
-const InstalledModelsSubject = new Subject<ModelInstance[]>(
+export const InstalledModelsSubject = new Subject<ModelInstance[]>(
   (() => {
     const stored = localStorage.getItem("installed_models");
     if (stored) return JSON.parse(stored);
     return [];
   })(),
 );
-const ModelDownloadsSubject = new Subject<Record<string, ModelDownload>>({});
+export const ModelDownloadsSubject = new Subject<Record<string, ModelDownload>>(
+  {},
+);
 
-const updateModelsSubjectThrottled = throttle(updateModelsSubject, 1000);
-
-AvailableModelsSubject.subscribe((data) => {
-  localStorage.setItem("available_models", data);
-  updateModelsSubjectThrottled();
-}, null);
-InstalledModelsSubject.subscribe((models) => {
-  localStorage.setItem("installed_models", JSON.stringify(models));
-  updateModelsSubjectThrottled();
-  fetchMissingDetailsForInstalled();
-  removeFinishedDownloads();
-}, null);
-ModelDetailsSubject.subscribe((details) => {
-  localStorage.setItem("model_details", JSON.stringify(details));
-  updateModelsSubjectThrottled();
-}, null);
-ModelDownloadsSubject.subscribe(updateModelsSubjectThrottled, null);
-
-syncAvailableModels({ retryInterval: 5000 });
-syncInstalledModels({ interval: 5000 });
-
-export function startModelDownload(name: string): Promise<void> {
-  const download = ModelDownloadsSubject.current()[name] || {
-    name,
-    layers: {},
-  };
-  return new Promise((resolve, reject) =>
-    pullModel(name, async ({ status, digest, total, completed }) => {
-      resolve();
-      if (digest && total && completed)
-        download.layers[digest] = { total, completed };
-      Object.assign(download, { status });
-      ModelDownloadsSubject.update((downloads) => {
-        downloads[name] = download;
-        return downloads;
-      });
-      if (status === "success") syncInstalledModels();
-    })
-      .then(() => resolve())
-      .catch(reject),
-  );
-}
-
-export async function removeModel(name: string): Promise<void> {
-  await deleteModel(name).catch(console.error);
-  await syncInstalledModels().catch(console.error);
-  const download = ModelDownloadsSubject.current()[name];
-  if (!download) return;
-  ModelDownloadsSubject.update((downloads) => {
-    delete downloads[name];
-    return downloads;
-  });
-}
-
-export async function syncModelDetails(name: string) {
-  const current = ModelDetailsSubject.current()[name];
-  const model = await getModelDetails(name);
-  if (JSON.stringify(current) === JSON.stringify(model)) return;
-  ModelDetailsSubject.update((current) => ({
-    ...current,
-    [model.name]: model,
-  }));
-}
-
-export async function syncAvailableModels({
-  retryInterval = 0,
-  retryCount = -1,
-} = {}) {
-  try {
-    const models = await getAvailableModels();
-    const data = JSON.stringify(models);
-    if (data !== AvailableModelsSubject.current())
-      AvailableModelsSubject.next(data);
-  } catch (error) {
-    if (retryInterval > 0 && retryCount !== 0) {
-      if (retryCount > 0) retryCount--;
-      setTimeout(syncAvailableModels, retryInterval, {
-        retryInterval,
-        retryCount,
-      });
-    }
-  }
-}
-
-export async function syncInstalledModels({ interval = 0 } = {}) {
-  try {
-    const instances = await getInstalledModels();
-    const newData = JSON.stringify(instances);
-    const currentData = JSON.stringify(InstalledModelsSubject.current());
-    if (newData !== currentData) InstalledModelsSubject.next(instances);
-  } finally {
-    if (interval > 0) setTimeout(syncInstalledModels, interval, { interval });
-  }
-}
+setTimeout(() => {
+  const updateModelsSubjectThrottled = throttle(updateModelsSubject, 1000);
+  AvailableModelsSubject.subscribe((data) => {
+    localStorage.setItem("available_models", data);
+    updateModelsSubjectThrottled();
+  }, null);
+  InstalledModelsSubject.subscribe((models) => {
+    localStorage.setItem("installed_models", JSON.stringify(models));
+    updateModelsSubjectThrottled();
+    fetchMissingDetailsForInstalled();
+    removeFinishedDownloads();
+  }, null);
+  ModelDetailsSubject.subscribe((details) => {
+    localStorage.setItem("model_details", JSON.stringify(details));
+    updateModelsSubjectThrottled();
+  }, null);
+  ModelDownloadsSubject.subscribe(updateModelsSubjectThrottled, null);
+});
 
 async function fetchMissingDetailsForInstalled() {
   const current = ModelDetailsSubject.current();
-  const installed = new Set(
+  const installedWithoutDetails = new Set(
     InstalledModelsSubject.current()
       .map((instance) => instance.name.split(":")[0])
       .filter((name) => !current[name]),
   );
   const updates = await Promise.allSettled(
-    Array.from(installed, (name) => getModelDetails(name)),
+    Array.from(installedWithoutDetails, (name) => getModelDetails(name)),
   );
   const updateObject: Record<string, Model> = Object.fromEntries(
     updates
