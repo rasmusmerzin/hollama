@@ -1,6 +1,6 @@
-import { onDoubleClick } from "../onDoubleClick";
 import "./ModalWindowElement.css";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { onDoubleClick } from "../utils/onDoubleClick";
 
 export const MODAL_WINDOW_BREAKPOINT = 440;
 

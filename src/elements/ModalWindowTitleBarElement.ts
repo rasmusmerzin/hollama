@@ -2,8 +2,8 @@ import "./ModalWindowTitleBarElement.css";
 import { ICON_CHEVRON_LEFT, ICON_CLOSE, ICON_SEARCH } from "../icons";
 import { TextInputElement } from "./TextInputElement";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { onDoubleClick } from "../onDoubleClick";
-import { stripObject } from "../stripObject";
+import { onDoubleClick } from "../utils/onDoubleClick";
+import { stripObject } from "../utils/stripObject";
 
 @tag("modal-window-title-bar-element")
 export class ModalWindowTitleBarElement extends HTMLElement {

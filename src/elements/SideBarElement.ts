@@ -3,8 +3,8 @@ import { DropdownMenuElement } from "./DropdownMenuElement";
 import { ICON_ADD_CHAT, ICON_MENU } from "../icons";
 import { SideBarSubject } from "../state/SideBarSubject";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { onDoubleClick } from "../onDoubleClick";
-import { stripObject } from "../stripObject";
+import { onDoubleClick } from "../utils/onDoubleClick";
+import { stripObject } from "../utils/stripObject";
 
 export const SIDE_BAR_BREAKPOINT = 640;
 
