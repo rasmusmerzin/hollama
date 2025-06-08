@@ -34,7 +34,15 @@ export function startModelDownload(name: string): Promise<void> {
       if (status === "success") syncInstalledModels();
     })
       .then(() => resolve())
-      .catch(reject),
+      .catch(reject)
+      .finally(() => {
+        const current = ModelDownloadsSubject.current();
+        if (!current[name]) return;
+        ModelDownloadsSubject.update((downloads) => {
+          delete downloads[name];
+          return downloads;
+        });
+      }),
   );
 }
 
