@@ -5,6 +5,7 @@ import { startChat } from "../services/chats";
 @tag("landing-view")
 export class LandingView extends HTMLElement {
   private messageInput: MessageInputElement;
+  private chatControl?: AbortController;
 
   constructor() {
     super();
@@ -16,9 +17,21 @@ export class LandingView extends HTMLElement {
     );
   }
 
+  disconnectedCallback() {
+    this.chatControl?.abort();
+    delete this.chatControl;
+  }
+
   private async onSubmit() {
+    this.chatControl?.abort();
+    this.chatControl = new AbortController();
     const { value } = this.messageInput;
-    const chat = await startChat({ model: "qwen3:0.6b", userMessage: value });
+    const chat = await startChat({
+      model: "qwen3:0.6b",
+      userMessage: value,
+      signal: this.chatControl.signal,
+    });
+    delete this.chatControl;
     history.replaceState({}, "", `/chat/${chat.id}`);
   }
 }

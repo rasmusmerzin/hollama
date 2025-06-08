@@ -3,7 +3,8 @@ message-input-element {
   display: block;
   width: var(--content-width);
   max-width: 100%;
-  padding: 8px;
+  padding: 0 8px 8px;
+  background: var(--background);
   > .container {
     background: var(--background-1);
     border-radius: 20px;

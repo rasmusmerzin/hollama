@@ -20,18 +20,20 @@ export function startChat({
       ? content
       : content.substring(0, delimIndex + 1).trim()
     ).substring(0, 128) || "New Chat";
-  const chat = chatStore.createChat(title);
-  chatStore.pushMessage(chat.id, { role: "user", content });
-  chatStore.lockChat(chat.id);
-  const { messages } = chat;
+  let chat: Chat | undefined;
   let message: ChatMessage | undefined;
   return new Promise((resolve, reject) =>
     generateChatMessage({
       model,
-      messages,
+      messages: [{ role: "user", content }],
       signal,
       callback: (part) => {
-        resolve(chat);
+        if (!chat) {
+          chat = chatStore.createChat(title);
+          chatStore.pushMessage(chat.id, { role: "user", content });
+          chatStore.lockChat(chat.id);
+          resolve(chat);
+        }
         if (!message || message.role !== part.message.role)
           message = chatStore.pushMessage(chat.id, {
             model,
@@ -41,12 +43,9 @@ export function startChat({
         else chatStore.appendLastMessage(chat.id, part.message.content);
       },
     })
-      .catch((error) => {
-        if (!message) chatStore.deleteChat(chat.id);
-        reject(error);
-      })
+      .catch(reject)
       .finally(() => {
-        chatStore.unlockChat(chat.id);
+        if (chat) chatStore.unlockChat(chat.id);
         reject();
       }),
   );

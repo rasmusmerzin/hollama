@@ -1,7 +1,7 @@
 import "./ChatView.css";
 import { Chat, ChatMessage } from "../state/database";
-import { MessageInputElement } from "../elements/MessageInputElement";
 import { ChatAppendEvent, ChatPushEvent, chatStore } from "../state/ChatStore";
+import { MessageInputElement } from "../elements/MessageInputElement";
 
 @tag("chat-view")
 export class ChatView extends HTMLElement {
@@ -46,11 +46,13 @@ export class ChatView extends HTMLElement {
     delete this.control;
   }
 
-  private onChatPush({ message }: ChatPushEvent) {
+  private onChatPush({ chat, message }: ChatPushEvent) {
+    if (this.chatId !== chat.id) return;
     this.bodyElement.append(Message(message));
   }
 
-  private onChatAppend({ message }: ChatAppendEvent) {
+  private onChatAppend({ chat, message }: ChatAppendEvent) {
+    if (this.chatId !== chat.id) return;
     const current = this.bodyElement.querySelector(`#u-${message.id}`);
     current?.replaceWith(Message(message));
   }
@@ -65,8 +67,8 @@ export class ChatView extends HTMLElement {
 
 function Message(message: ChatMessage) {
   return createElement(
-    "div",
-    { id: `u-${message.id}` },
-    JSON.stringify(message),
+    "pre",
+    { id: `u-${message.id}`, style: "white-space: pre-wrap;" },
+    JSON.stringify(message, null, 2),
   );
 }
