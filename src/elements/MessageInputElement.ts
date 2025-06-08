@@ -30,6 +30,7 @@ export class MessageInputElement extends HTMLElement {
           createElement("button", {
             className: "primary",
             innerHTML: ICON_ARROW_UPWARD,
+            onclick: () => this.dispatchEvent(new Event("submit")),
           }),
         ]),
       ]),

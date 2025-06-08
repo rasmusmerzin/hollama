@@ -1,7 +1,7 @@
 import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 import { parseBytes } from "../utils/bytes";
 
-const hubOrigin = "https://ollama.com";
+const origin = "https://ollama.com";
 const domParser = new DOMParser();
 
 export interface Model {
@@ -22,7 +22,7 @@ export interface ModelTag {
 }
 
 export async function getAvailableModels(): Promise<Model[]> {
-  const url = new URL("/search", hubOrigin);
+  const url = new URL("/search", origin);
   const response = await tauriFetch(url);
   if (!response.ok) throw new Error("Failed to fetch available models");
   const html = await response.text();
@@ -50,7 +50,7 @@ export async function getAvailableModels(): Promise<Model[]> {
 }
 
 export async function getModelDetails(model: string): Promise<Model> {
-  const url = new URL(`/library/${model}`, hubOrigin);
+  const url = new URL(`/library/${model}`, origin);
   const response = await tauriFetch(url);
   if (!response.ok) throw new Error("Failed to fetch model details");
   const html = await response.text();

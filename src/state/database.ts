@@ -1,3 +1,4 @@
+import { ChatRole } from "../fetch/ollamaClient";
 import { DBSchema, openDB } from "idb";
 
 export interface Chat {
@@ -6,11 +7,12 @@ export interface Chat {
   created: string;
   updated: string;
   messages: ChatMessage[];
+  locked?: boolean;
 }
 
 export interface ChatMessage {
   id: string;
-  role: "user" | "assistant" | "system" | "tool";
+  role: ChatRole;
   model?: string;
   content: string;
   created: string;

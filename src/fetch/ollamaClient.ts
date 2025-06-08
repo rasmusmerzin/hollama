@@ -16,11 +16,26 @@ export interface ModelInstance {
   };
 }
 
-export interface Progress {
+export interface PullProgress {
   status: string;
   digest?: string;
   total?: number;
   completed?: number;
+}
+
+export type ChatRole = "system" | "user" | "assistant" | "tool";
+
+export interface ChatMessagePart {
+  model: string;
+  created_at: string;
+  message: { role: ChatRole; content: string };
+  done: boolean;
+  total_duration?: number;
+  load_duration?: number;
+  prompt_eval_count?: number;
+  prompt_eval_duration?: number;
+  eval_count?: number;
+  eval_duration?: number;
 }
 
 export async function getInstalledModels(): Promise<ModelInstance[]> {
@@ -31,22 +46,49 @@ export async function getInstalledModels(): Promise<ModelInstance[]> {
   return data.models;
 }
 
+export async function deleteModel(model: string): Promise<void> {
+  const url = new URL("/api/delete", origin);
+  const body = JSON.stringify({ model });
+  const response = await fetch(url, { method: "DELETE", body });
+  if (!response.ok) throw new Error("Failed to delete model");
+}
+
 export async function pullModel(
   model: string,
-  progressCallback?: (progress: Progress) => any,
+  callback?: (progress: PullProgress) => any,
 ): Promise<void> {
   const url = new URL("/api/pull", origin);
-  const stream = !!progressCallback;
+  const stream = !!callback;
   const body = JSON.stringify({ model, stream });
   const response = await fetch(url, { method: "POST", body });
-  if (progressCallback) {
+  if (callback) {
     if (!response.body) return;
     const reader = response.body.getReader();
-    await readStreamAsJson(reader, progressCallback);
+    await readJsonStream(reader, callback);
   } else await response.text();
 }
 
-async function readStreamAsJson<T extends object>(
+export async function generateChatMessage({
+  model,
+  messages,
+  signal,
+  callback,
+}: {
+  model: string;
+  messages: { role: ChatRole; content: string }[];
+  signal?: AbortSignal;
+  callback: (part: ChatMessagePart) => any;
+}): Promise<void> {
+  const url = new URL("/api/chat", origin);
+  messages = messages.map(({ role, content }) => ({ role, content }));
+  const body = JSON.stringify({ model, messages });
+  const response = await fetch(url, { method: "POST", body, signal });
+  if (!response.body) return;
+  const reader = response.body.getReader();
+  await readJsonStream(reader, callback);
+}
+
+async function readJsonStream<T extends object>(
   reader: ReadableStreamDefaultReader,
   callback: (item: T) => any,
 ): Promise<void> {
@@ -64,15 +106,16 @@ async function readStreamAsJson<T extends object>(
         const object = JSON.parse(jsonStr);
         setTimeout(callback, 0, object);
       } catch (error) {
-        console.error("Error parsing progress data:", jsonStr);
+        console.error("Error parsing stream data:", jsonStr);
       }
     }
   }
-}
-
-export async function deleteModel(model: string): Promise<void> {
-  const url = new URL("/api/delete", origin);
-  const body = JSON.stringify({ model });
-  const response = await fetch(url, { method: "DELETE", body });
-  if (!response.ok) throw new Error("Failed to delete model");
+  if (buffer.trim()) {
+    try {
+      const object = JSON.parse(buffer.trim());
+      setTimeout(callback, 0, object);
+    } catch (error) {
+      console.error("Error parsing stream data:", buffer.trim());
+    }
+  }
 }

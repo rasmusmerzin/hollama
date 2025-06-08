@@ -1,6 +1,7 @@
 import "./styles.css";
 import "@merzin/element";
 import { AboutModal } from "./modals/AboutModal";
+import { ChatView } from "./views/ChatView";
 import { LandingView } from "./views/LandingView";
 import { ModelsModal } from "./modals/ModelsModal";
 import { PreferencesModal } from "./modals/PreferencesModal";
@@ -32,6 +33,7 @@ addEventListener("contextmenu", (event) => {
 });
 
 defineRoute("/", LandingView);
+defineRoute("/chat/:chatId", ChatView);
 defineRoute("#preferences", PreferencesModal);
 defineRoute("#about", AboutModal);
 defineRoute("#models", ModelsModal);
