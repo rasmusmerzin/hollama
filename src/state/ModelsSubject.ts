@@ -7,7 +7,7 @@ import {
   getModelDetails,
   pullModel,
 } from "../services/ollama";
-import { Subject } from "../Subject";
+import { Subject } from "./Subject";
 import { throttle } from "../throttle";
 
 export interface ModelDownload {

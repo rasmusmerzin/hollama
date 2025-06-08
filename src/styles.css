@@ -9,6 +9,7 @@
   --background-2b: var(--background-1);
   --highlight: hsl(0, 0%, 100%);
   --primary: hsl(210, 100%, 50%);
+  --content-width: 800px;
   font-family: "Open Sans", Helvetica, sans-serif;
   font-size: 14px;
   line-height: 20px;

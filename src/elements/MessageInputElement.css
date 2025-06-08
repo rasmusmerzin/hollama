@@ -1,0 +1,50 @@
+message-input-element {
+  flex-shrink: 0;
+  display: block;
+  width: var(--content-width);
+  max-width: 100%;
+  padding: 8px 16px;
+  > .container {
+    background: var(--background-1);
+    border-radius: 20px;
+    > textarea {
+      font-size: 14px;
+      line-height: 16px;
+      width: 100%;
+      padding: 16px 16px 8px;
+      display: block;
+      outline: none;
+      resize: none;
+      &::placeholder {
+        color: #888;
+      }
+    }
+    > .actions {
+      padding: 0 8px 8px;
+      display: flex;
+      gap: 8px;
+      > div {
+        flex: 1;
+      }
+      > button {
+        background: var(--background-1);
+        border-radius: 16px;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        svg {
+          width: 20px;
+          height: 20px;
+        }
+        &.primary {
+          background: var(--foreground);
+          svg {
+            fill: var(--background-0);
+          }
+        }
+      }
+    }
+  }
+}

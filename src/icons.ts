@@ -16,5 +16,11 @@ export const ICON_DOWNLOAD = `<svg viewBox="0 -960 960 960"><path d="M480-320 28
 
 export const ICON_SPINNER = `<svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="88" fill="none" stroke-width="24" stroke-dasharray="566" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="1s" repeatCount="indefinite"/><animate attributeName="stroke-dashoffset" dur="2s" values="200;500;200" repeatCount="indefinite"/></circle></svg>`;
 
+export const ICON_ADD = `<svg viewBox="0 -960 960 960"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg>`;
+
+export const ICON_ARROW_UPWARD = `<svg viewBox="0 -960 960 960"><path d="M440-160v-487L216-423l-56-57 320-320 320 320-56 57-224-224v487h-80Z"/></svg>`;
+
+export const ICON_MIC = `<svg viewBox="0 -960 960 960"><path d="M480-400q-50 0-85-35t-35-85v-240q0-50 35-85t85-35q50 0 85 35t35 85v240q0 50-35 85t-85 35Zm0-240Zm-40 520v-123q-104-14-172-93t-68-184h80q0 83 58.5 141.5T480-320q83 0 141.5-58.5T680-520h80q0 105-68 184t-172 93v123h-80Zm40-360q17 0 28.5-11.5T520-520v-240q0-17-11.5-28.5T480-800q-17 0-28.5 11.5T440-760v240q0 17 11.5 28.5T480-480Z"/></svg>`;
+
 export const iconProgress = (progress: number) =>
   `<svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="88" fill="none" stroke-width="24" opacity="0.2"></circle><circle cx="100" cy="100" r="88" fill="none" stroke-width="24" stroke-dasharray="566" stroke-dashoffset="${(1 - progress * 0.95) * 566}" transform="rotate(-90 100 100)" stroke-linecap="round"></circle></svg>`;

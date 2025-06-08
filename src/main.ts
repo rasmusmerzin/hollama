@@ -1,12 +1,13 @@
 import "./styles.css";
 import "@merzin/element";
 import { AboutModal } from "./modals/AboutModal";
+import { LandingView } from "./views/LandingView";
+import { ModelsModal } from "./modals/ModelsModal";
 import { PreferencesModal } from "./modals/PreferencesModal";
 import { SideBarElement } from "./elements/SideBarElement";
 import { TitleBarElement } from "./elements/TitleBarElement";
 import { defineRoute, startRouter } from "@merzin/router";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { ModelsModal } from "./modals/ModelsModal";
 
 const root = document.getElementById("root")!;
 const titleBar = new TitleBarElement();
@@ -30,6 +31,7 @@ addEventListener("contextmenu", (event) => {
   event.preventDefault();
 });
 
+defineRoute("/", LandingView);
 defineRoute("#preferences", PreferencesModal);
 defineRoute("#about", AboutModal);
 defineRoute("#models", ModelsModal);

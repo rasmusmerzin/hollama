@@ -11,7 +11,7 @@ import {
   removeModel,
   startModelDownload,
   syncModelDetails,
-} from "../subjects/ModelsSubject";
+} from "../state/ModelsSubject";
 import { TagElement } from "../elements/TagElement";
 import { stripObject } from "../stripObject";
 import { throttle } from "../throttle";
