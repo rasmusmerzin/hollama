@@ -1,47 +1,18 @@
 import "./SideBarElement.css";
-import { DropdownMenuElement } from "./DropdownMenuElement";
-import { ICON_ADD_CHAT, ICON_MENU } from "../icons";
 import { SideBarSubject } from "../state/SideBarSubject";
-import { getCurrentWindow } from "@tauri-apps/api/window";
-import { onDoubleClick } from "../utils/onDoubleClick";
+import { SideBarTitleBarElement } from "./SideBarTitleBarElement";
 import { stripObject } from "../utils/stripObject";
 
 export const SIDE_BAR_BREAKPOINT = 640;
 
 @tag("side-bar-element")
 export class SideBarElement extends HTMLElement {
-  private appWindow = getCurrentWindow();
-  private menuButton: HTMLButtonElement;
-  private titleElement: HTMLDivElement;
   private control?: AbortController;
 
   constructor() {
     super();
     this.replaceChildren(
-      (this.titleElement = createElement(
-        "div",
-        {
-          className: "title",
-          onmousedown: (event) =>
-            !event.button && this.appWindow.startDragging(),
-        },
-        [
-          createElement("div", { className: "left" }, [
-            createElement("button", {
-              innerHTML: ICON_ADD_CHAT,
-              onmousedown: stopPropagation,
-            }),
-          ]),
-          createElement("div", { className: "center" }, "Hollama"),
-          createElement("div", { className: "right" }, [
-            (this.menuButton = createElement("button", {
-              innerHTML: ICON_MENU,
-              onmousedown: stopPropagation,
-              onclick: this.openDropdownMenu.bind(this),
-            })),
-          ]),
-        ],
-      )),
+      createElement(SideBarTitleBarElement),
       createElement("div", {
         className: "shadow",
         onmousedown: () =>
@@ -73,11 +44,6 @@ export class SideBarElement extends HTMLElement {
     }, this.control);
     this.onStateChange();
     addEventListener("resize", this.onResize.bind(this), this.control);
-    onDoubleClick(
-      this.titleElement,
-      () => this.appWindow.toggleMaximize(),
-      this.control.signal,
-    );
     addEventListener(
       "statechange",
       this.onStateChange.bind(this),
@@ -105,34 +71,6 @@ export class SideBarElement extends HTMLElement {
       history.back();
   }
 
-  private openDropdownMenu() {
-    this.menuButton.classList.add("active");
-    document.body.append(
-      createElement(DropdownMenuElement, {
-        anchor: this.menuButton,
-        ondisconnect: () => this.menuButton.classList.remove("active"),
-        items: [
-          {
-            label: "Models",
-            action: () =>
-              history.pushState(stripObject(history.state), "", "#models"),
-          },
-          "div",
-          {
-            label: "Preferences",
-            action: () =>
-              history.pushState(stripObject(history.state), "", "#preferences"),
-          },
-          {
-            label: "About Hollama",
-            action: () =>
-              history.pushState(stripObject(history.state), "", "#about"),
-          },
-        ],
-      }),
-    );
-  }
-
   private previousWidth = innerWidth;
   private onResize() {
     if (history.stack.index > 1) return;
@@ -151,8 +89,4 @@ export class SideBarElement extends HTMLElement {
       SideBarSubject.update((state) => ({ ...state, open: false }));
     this.previousWidth = innerWidth;
   }
-}
-
-function stopPropagation(event: Event) {
-  event.stopPropagation();
 }
