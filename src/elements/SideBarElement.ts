@@ -1,4 +1,5 @@
 import "./SideBarElement.css";
+import { SideBarBodyElement } from "./SideBarBodyElement";
 import { SideBarSubject } from "../state/SideBarSubject";
 import { SideBarTitleBarElement } from "./SideBarTitleBarElement";
 import { stripObject } from "../utils/stripObject";
@@ -13,6 +14,7 @@ export class SideBarElement extends HTMLElement {
     super();
     this.replaceChildren(
       createElement(SideBarTitleBarElement),
+      createElement(SideBarBodyElement),
       createElement("div", {
         className: "shadow",
         onmousedown: () =>

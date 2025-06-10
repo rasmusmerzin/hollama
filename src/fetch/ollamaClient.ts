@@ -110,12 +110,12 @@ async function readJsonStream<T extends object>(
       }
     }
   }
-  if (buffer.trim()) {
+  if ((buffer = buffer.trim())) {
     try {
-      const object = JSON.parse(buffer.trim());
+      const object = JSON.parse(buffer);
       setTimeout(callback, 0, object);
     } catch (error) {
-      console.error("Error parsing stream data:", buffer.trim());
+      console.error("Error parsing stream data:", buffer);
     }
   }
 }

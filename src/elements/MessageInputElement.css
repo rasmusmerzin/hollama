@@ -1,4 +1,6 @@
 message-input-element {
+  position: sticky;
+  bottom: 0;
   flex-shrink: 0;
   display: block;
   width: var(--content-width);

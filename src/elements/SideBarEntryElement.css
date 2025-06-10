@@ -1,0 +1,22 @@
+side-bar-entry-element {
+  display: block;
+  padding: 8px;
+  background: var(--background-1);
+  border-radius: 8px;
+  &.active {
+    background: var(--background-2);
+  }
+  &:not(.active) {
+    cursor: pointer;
+    &:hover {
+      filter: brightness(0.9);
+    }
+  }
+  @media (max-width: 640px) {
+    background: var(--background-1s);
+  }
+}
+
+:root[dark] side-bar-entry-element:not(.active):hover {
+  filter: brightness(1.5);
+}
