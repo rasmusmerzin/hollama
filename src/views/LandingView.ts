@@ -26,12 +26,20 @@ export class LandingView extends HTMLElement {
     this.chatControl?.abort();
     this.chatControl = new AbortController();
     const { value } = this.messageInput;
-    const chat = await startChat({
-      model: "qwen3:0.6b",
-      userMessage: value,
-      signal: this.chatControl.signal,
-    });
-    delete this.chatControl;
-    history.replaceState({}, "", `/chat/${chat.id}`);
+    try {
+      this.messageInput.loading = true;
+      const chat = await startChat({
+        model: "qwen3:0.6b",
+        userMessage: value,
+        signal: this.chatControl.signal,
+      });
+      const { aborted } = this.chatControl.signal;
+      delete this.chatControl;
+      if (!aborted) history.replaceState({}, "", `/chat/${chat.id}`);
+    } catch (error) {
+      // TODO: Alert
+    } finally {
+      this.messageInput.loading = false;
+    }
   }
 }

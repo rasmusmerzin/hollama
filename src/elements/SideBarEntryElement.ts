@@ -11,6 +11,7 @@ export class SideBarEntryElement extends HTMLElement {
   }
   set chat(chat: Chat | undefined) {
     this.#chat = chat;
+    this.id = chat ? `chat-${chat.id}` : "";
     this.innerText = chat?.title || "";
   }
 

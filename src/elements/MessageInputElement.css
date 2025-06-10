@@ -37,14 +37,18 @@ message-input-element {
         display: flex;
         justify-content: center;
         align-items: center;
-        svg {
+        &:disabled {
+          opacity: 0.5;
+        }
+        > svg {
           width: 20px;
           height: 20px;
         }
         &.primary {
           background: var(--foreground);
-          svg {
+          > svg {
             fill: var(--background-0);
+            stroke: var(--background-0);
           }
         }
       }

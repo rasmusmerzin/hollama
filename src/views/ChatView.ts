@@ -2,6 +2,7 @@ import "./ChatView.css";
 import { Chat, ChatMessage } from "../state/database";
 import { ChatAppendEvent, ChatPushEvent, chatStore } from "../state/ChatStore";
 import { MessageInputElement } from "../elements/MessageInputElement";
+import { MessageElement } from "../elements/MessageElement";
 
 @tag("chat-view")
 export class ChatView extends HTMLElement {
@@ -48,27 +49,22 @@ export class ChatView extends HTMLElement {
 
   private onChatPush({ chat, message }: ChatPushEvent) {
     if (this.chatId !== chat.id) return;
-    this.bodyElement.append(Message(message));
+    this.bodyElement.append(createElement(MessageElement, { message }));
   }
 
   private onChatAppend({ chat, message }: ChatAppendEvent) {
     if (this.chatId !== chat.id) return;
-    const current = this.bodyElement.querySelector(`#u-${message.id}`);
-    current?.replaceWith(Message(message));
+    const element = this.bodyElement.querySelector(`#msg-${message.id}`);
+    if (!(element instanceof MessageElement)) return;
+    element.message = message;
   }
 
   private initialRender() {
     if (!this.chat) this.chat = chatStore.getChat(this.chatId);
     this.bodyElement.replaceChildren(
-      ...(this.chat?.messages.map(Message) || []),
+      ...(this.chat?.messages.map((message) =>
+        createElement(MessageElement, { message }),
+      ) || []),
     );
   }
-}
-
-function Message(message: ChatMessage) {
-  return createElement(
-    "pre",
-    { id: `u-${message.id}`, style: "white-space: pre-wrap;" },
-    JSON.stringify(message, null, 2),
-  );
 }
