@@ -1,8 +1,10 @@
 import "./ChatView.css";
 import { Chat } from "../state/database";
 import { ChatAppendEvent, ChatPushEvent, chatStore } from "../state/ChatStore";
-import { MessageInputElement } from "../elements/MessageInputElement";
+import { InstalledModelsSubject } from "../state/ModelsSubject";
 import { MessageElement } from "../elements/MessageElement";
+import { MessageInputElement } from "../elements/MessageInputElement";
+import { SelectedModelSubject } from "../state/SelectedModelSubject";
 import { continueChat } from "../services/chats";
 
 @tag("chat-view")
@@ -60,6 +62,14 @@ export class ChatView extends HTMLElement {
       this.updateDisabled.bind(this),
       this.control,
     );
+    const model = chatStore.getChatLastModel(this.chatId);
+    if (
+      model &&
+      InstalledModelsSubject.current().some(
+        (instance) => instance.name === model,
+      )
+    )
+      SelectedModelSubject.next(model);
   }
 
   disconnectedCallback() {
@@ -73,11 +83,12 @@ export class ChatView extends HTMLElement {
     this.chatControl?.abort();
     this.chatControl = new AbortController();
     const { value } = this.messageInput;
+    const model = SelectedModelSubject.current()!;
     try {
       this.messageInput.loading = true;
       await continueChat({
         chatId: this.chatId,
-        model: "qwen3:0.6b",
+        model,
         userMessage: value,
         signal: this.chatControl.signal,
       });

@@ -12,6 +12,15 @@ export class ChatStore extends EventTarget {
     return this.chats.find((chat) => chat.id === id);
   }
 
+  getChatLastModel(chatId: string): string | undefined {
+    const chat = this.getChat(chatId);
+    if (!chat?.messages.length) return undefined;
+    for (let i = chat.messages.length - 1; i >= 0; i--) {
+      const message = chat.messages[i];
+      if (message.model) return message.model;
+    }
+  }
+
   createChat(title: string): Chat {
     const id = crypto.randomUUID();
     const created = new Date().toISOString();

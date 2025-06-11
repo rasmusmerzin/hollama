@@ -3,6 +3,9 @@ side-bar-entry-element {
   padding: 8px;
   background: var(--background-1);
   border-radius: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   &.active {
     background: var(--background-2);
   }

@@ -1,5 +1,6 @@
 import "./LandingView.css";
 import { MessageInputElement } from "../elements/MessageInputElement";
+import { SelectedModelSubject } from "../state/SelectedModelSubject";
 import { startChat } from "../services/chats";
 
 @tag("landing-view")
@@ -26,10 +27,11 @@ export class LandingView extends HTMLElement {
     this.chatControl?.abort();
     this.chatControl = new AbortController();
     const { value } = this.messageInput;
+    const model = SelectedModelSubject.current()!;
     try {
       this.messageInput.loading = true;
       const chat = await startChat({
-        model: "qwen3:0.6b",
+        model,
         userMessage: value,
         signal: this.chatControl.signal,
       });
