@@ -40,6 +40,7 @@ export class MessageInputElement extends HTMLElement {
           placeholder: "Ask anything",
           rows: 2,
           oninput: this.onInput.bind(this),
+          onkeydown: this.onKeydown.bind(this),
         })),
         createElement("div", { className: "actions" }, [
           createElement("button", { innerHTML: ICON_ADD }),
@@ -70,6 +71,15 @@ export class MessageInputElement extends HTMLElement {
   private onInput() {
     this.updateDisabled();
     this.resizeTextarea();
+  }
+
+  private onKeydown(event: KeyboardEvent) {
+    const modifiers =
+      event.shiftKey || event.ctrlKey || event.altKey || event.metaKey;
+    if (event.key === "Enter" && !modifiers) {
+      event.preventDefault();
+      if (this.value.trim()) this.dispatchEvent(new Event("submit"));
+    }
   }
 
   private updateDisabled() {
