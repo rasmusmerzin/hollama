@@ -1,6 +1,6 @@
 message-element {
   display: block;
-  margin: 0 0 4px;
+  margin: 0 0 16px;
   > .content {
     white-space: pre-wrap;
   }

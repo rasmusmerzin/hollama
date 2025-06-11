@@ -50,3 +50,47 @@ export function startChat({
       }),
   );
 }
+
+export async function continueChat({
+  chatId,
+  model,
+  userMessage: content,
+  signal,
+}: {
+  chatId: string;
+  model: string;
+  userMessage: string;
+  signal?: AbortSignal;
+}): Promise<void> {
+  const chat = chatStore.getChat(chatId);
+  if (!chat) return;
+  let resolved = false;
+  let message: ChatMessage | undefined;
+  return new Promise((resolve, reject) =>
+    generateChatMessage({
+      model,
+      messages: [...chat.messages, { role: "user", content }],
+      signal,
+      callback: (part) => {
+        if (!resolved) {
+          resolved = true;
+          resolve();
+          chatStore.pushMessage(chat.id, { role: "user", content });
+          chatStore.lockChat(chat.id);
+        }
+        if (!message || message.role !== part.message.role)
+          message = chatStore.pushMessage(chat.id, {
+            model,
+            role: part.message.role,
+            content: part.message.content,
+          });
+        else chatStore.appendLastMessage(chat.id, part.message.content);
+      },
+    })
+      .catch(reject)
+      .finally(() => {
+        if (chat) chatStore.unlockChat(chat.id);
+        reject();
+      }),
+  );
+}
