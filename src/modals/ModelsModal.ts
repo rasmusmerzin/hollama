@@ -179,8 +179,13 @@ export function ModelsModal() {
                     ? createElement("button", {
                         className: "action",
                         innerHTML: ICON_DELETE,
-                        onclick: () =>
-                          removeModel(`${model.name}:${tag.label}`),
+                        onclick: () => {
+                          removeModel(`${model.name}:${tag.label}`);
+                          if (model.latestTag === tag.label)
+                            removeModel(`${model.name}:latest`);
+                          else if (tag.label === "latest" && model.latestTag)
+                            removeModel(`${model.name}:${model.latestTag}`);
+                        },
                       })
                     : createElement("button", {
                         className: "action",
@@ -228,13 +233,15 @@ export function ModelsModal() {
               { className: "name", style: "margin-right: 4px" },
               model.name,
             ),
-            ...model.tags.map((tag) =>
-              createElement(
-                TagElement,
-                { disabled: !tag.installed && tag.downloaded == null },
-                tag.label,
+            ...model.tags
+              .filter((tag) => tag.label !== "latest")
+              .map((tag) =>
+                createElement(
+                  TagElement,
+                  { disabled: !tag.installed && tag.downloaded == null },
+                  tag.label,
+                ),
               ),
-            ),
           ],
         ),
         description: model.description,

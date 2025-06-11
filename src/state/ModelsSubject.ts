@@ -1,4 +1,4 @@
-import { Model, getModelDetails } from "../fetch/ollamaHub";
+import { Model, ModelTag, getModelDetails } from "../fetch/ollamaHub";
 import { ModelInstance } from "../fetch/ollamaClient";
 import { Subject } from "./Subject";
 import { throttle } from "../utils/throttle";
@@ -98,12 +98,7 @@ function constructModels(): Record<string, Model> {
     if (!tagLabel) tagLabel = "latest";
     const model = models[name];
     if (model) {
-      const tag = model.tags.find((t) => t.label === tagLabel);
-      if (tag) tag.installed = true;
-      if (model.latestTag && tagLabel === "latest") {
-        const tag = model.tags.find((t) => t.label === model.latestTag);
-        if (tag) tag.installed = true;
-      }
+      for (const tag of getModelTags(tagLabel, model)) tag.installed = true;
     } else {
       models[name] = {
         name,
@@ -122,12 +117,8 @@ function constructModels(): Record<string, Model> {
       0,
     );
     if (model) {
-      const tag = model.tags.find((t) => t.label === tagLabel);
-      if (tag) Object.assign(tag, { downloaded });
-      if (model.latestTag && tagLabel === "latest") {
-        const tag = model.tags.find((t) => t.label === model.latestTag);
-        if (tag) Object.assign(tag, { downloaded });
-      }
+      for (const tag of getModelTags(tagLabel, model))
+        Object.assign(tag, { downloaded });
     } else {
       models[name] = {
         name,
@@ -136,6 +127,20 @@ function constructModels(): Record<string, Model> {
         categories: [],
       };
     }
+  }
+  function getModelTags(tagLabel: string, model: Model): ModelTag[] {
+    const tags: ModelTag[] = [];
+    const tag = model.tags.find((t) => t.label === tagLabel);
+    if (tag) tags.push(tag);
+    if (tagLabel === model.latestTag) {
+      const tag = model.tags.find((t) => t.label === "latest");
+      if (tag) tags.push(tag);
+    }
+    if (model.latestTag && tagLabel === "latest") {
+      const tag = model.tags.find((t) => t.label === model.latestTag);
+      if (tag) tags.push(tag);
+    }
+    return tags;
   }
   return models;
 }
