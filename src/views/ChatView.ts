@@ -24,7 +24,7 @@ export class ChatView extends HTMLElement {
       (this.bodyElement = createElement("div", { className: "body" })),
       (this.messageInput = createElement(MessageInputElement, {
         onsubmit: this.onSubmit.bind(this),
-        oninput: this.onInput.bind(this),
+        onresize: this.onResize.bind(this),
       })),
     );
   }
@@ -112,7 +112,7 @@ export class ChatView extends HTMLElement {
     else this.atBottom = this.getScrollBottom() < 100;
   }
 
-  private onInput() {
+  private onResize() {
     if (this.atBottom) this.scrollToBottom();
   }
 

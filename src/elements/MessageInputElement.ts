@@ -143,5 +143,6 @@ export class MessageInputElement extends HTMLElement {
     const textHeight = this.textareaElement.scrollHeight - padding;
     const rows = Math.round(textHeight / lineHeight);
     this.textareaElement.rows = Math.max(minRows, Math.min(rows, maxRows));
+    this.dispatchEvent(new Event("resize"));
   }
 }

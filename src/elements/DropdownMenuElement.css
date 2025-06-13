@@ -9,13 +9,10 @@ dropdown-menu-element {
     pointer-events: none;
     position: absolute;
     left: 50%;
-    top: calc(100% + 2px);
     transform: translateX(-50%) rotate(45deg);
     width: 9px;
     height: 9px;
     background: var(--background-2s);
-    border-left: 1px solid #0004;
-    border-top: 1px solid #0004;
   }
   > .shadow {
     position: fixed;
@@ -29,7 +26,6 @@ dropdown-menu-element {
     position: absolute;
     z-index: 1;
     left: 50%;
-    top: calc(100% + 8px);
     transform: translateX(-50%);
     width: calc(var(--width) * 1px);
     border-radius: 12px;
@@ -38,6 +34,7 @@ dropdown-menu-element {
     display: flex;
     flex-direction: column;
     box-shadow: 0 0 8px #0004;
+    overflow: auto;
     > div {
       height: 1px;
       background: #8888;
@@ -48,6 +45,26 @@ dropdown-menu-element {
       text-align: left;
       background: var(--background-2s);
       border-radius: 8px;
+    }
+  }
+  &:not([flipped]) {
+    &::before {
+      top: calc(100% + 2px);
+      border-left: 1px solid #0004;
+      border-top: 1px solid #0004;
+    }
+    > .container {
+      top: calc(100% + 8px);
+    }
+  }
+  &[flipped] {
+    &::before {
+      bottom: calc(100% + 2px);
+      border-right: 1px solid #0004;
+      border-bottom: 1px solid #0004;
+    }
+    > .container {
+      bottom: calc(100% + 8px);
     }
   }
 }

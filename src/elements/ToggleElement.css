@@ -9,6 +9,7 @@ toggle-element {
   line-height: 16px;
   border-radius: 16px;
   cursor: pointer;
+  transition: filter 200ms;
   &::before {
     content: "";
     pointer-events: none;
@@ -27,4 +28,11 @@ toggle-element {
     color: var(--background-0);
     background: var(--foreground);
   }
+  &:hover {
+    filter: brightness(0.9);
+  }
+}
+
+:root[dark] toggle-element:hover {
+  filter: brightness(1.5);
 }
