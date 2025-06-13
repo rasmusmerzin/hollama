@@ -5,10 +5,12 @@ import { generateChatMessage } from "../fetch/ollamaClient";
 export function startChat({
   model,
   userMessage: content,
+  think,
   signal,
 }: {
   model: string;
   userMessage: string;
+  think?: boolean;
   signal?: AbortSignal;
 }): Promise<Chat> {
   content = content.trim();
@@ -26,6 +28,7 @@ export function startChat({
     generateChatMessage({
       model,
       messages: [{ role: "user", content }],
+      think,
       signal,
       callback: (part) => {
         if (!chat) {
@@ -39,8 +42,14 @@ export function startChat({
             model,
             role: part.message.role,
             content: part.message.content,
+            thinking: part.message.thinking,
           });
-        else chatStore.appendLastMessage(chat.id, part.message.content);
+        else
+          chatStore.appendLastMessage(
+            chat.id,
+            part.message.content,
+            part.message.thinking,
+          );
       },
     })
       .catch(reject)
@@ -55,11 +64,13 @@ export async function continueChat({
   chatId,
   model,
   userMessage: content,
+  think,
   signal,
 }: {
   chatId: string;
   model: string;
   userMessage: string;
+  think?: boolean;
   signal?: AbortSignal;
 }): Promise<void> {
   const chat = chatStore.getChat(chatId);
@@ -70,6 +81,7 @@ export async function continueChat({
     generateChatMessage({
       model,
       messages: [...chat.messages, { role: "user", content }],
+      think,
       signal,
       callback: (part) => {
         if (!resolved) {
@@ -83,8 +95,14 @@ export async function continueChat({
             model,
             role: part.message.role,
             content: part.message.content,
+            thinking: part.message.thinking,
           });
-        else chatStore.appendLastMessage(chat.id, part.message.content);
+        else
+          chatStore.appendLastMessage(
+            chat.id,
+            part.message.content,
+            part.message.thinking,
+          );
       },
     })
       .catch(reject)

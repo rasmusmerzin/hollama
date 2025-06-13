@@ -32,16 +32,12 @@ export class ChatView extends HTMLElement {
   connectedCallback() {
     this.control?.abort();
     this.control = new AbortController();
-    this.initialRender();
+    this.onLoad();
     this.addEventListener("scroll", this.onScroll.bind(this), {
       passive: true,
       signal: this.control.signal,
     });
-    chatStore.addEventListener(
-      "load",
-      this.initialRender.bind(this),
-      this.control,
-    );
+    chatStore.addEventListener("load", this.onLoad.bind(this), this.control);
     chatStore.addEventListener(
       "push",
       this.onChatPush.bind(this) as any,
@@ -62,14 +58,6 @@ export class ChatView extends HTMLElement {
       this.updateDisabled.bind(this),
       this.control,
     );
-    const model = chatStore.getChatLastModel(this.chatId);
-    if (
-      model &&
-      InstalledModelsSubject.current().some(
-        (instance) => instance.name === model,
-      )
-    )
-      SelectedModelSubject.next(model);
   }
 
   disconnectedCallback() {
@@ -82,7 +70,7 @@ export class ChatView extends HTMLElement {
   private async onSubmit() {
     this.chatControl?.abort();
     this.chatControl = new AbortController();
-    const { value } = this.messageInput;
+    const { value, think } = this.messageInput;
     const model = SelectedModelSubject.current()!;
     try {
       this.messageInput.loading = true;
@@ -90,6 +78,7 @@ export class ChatView extends HTMLElement {
         chatId: this.chatId,
         model,
         userMessage: value,
+        think,
         signal: this.chatControl.signal,
       });
       delete this.chatControl;
@@ -104,7 +93,7 @@ export class ChatView extends HTMLElement {
   private onChatPush({ chat, message }: ChatPushEvent) {
     if (this.chatId !== chat.id) return;
     this.bodyElement.append(createElement(MessageElement, { message }));
-    if (this.atBottom) this.scrollTo({ top: this.scrollHeight });
+    if (this.atBottom) this.scrollToBottom();
   }
 
   private onChatAppend({ chat, message }: ChatAppendEvent) {
@@ -112,7 +101,7 @@ export class ChatView extends HTMLElement {
     const element = this.bodyElement.querySelector(`#msg-${message.id}`);
     if (!(element instanceof MessageElement)) return;
     element.message = message;
-    if (this.atBottom) this.scrollTo({ top: this.scrollHeight });
+    if (this.atBottom) this.scrollToBottom();
   }
 
   private previousScrollTop = this.scrollTop;
@@ -124,18 +113,34 @@ export class ChatView extends HTMLElement {
   }
 
   private onInput() {
-    if (this.atBottom) this.scrollTo({ top: this.scrollHeight });
+    if (this.atBottom) this.scrollToBottom();
   }
 
-  private initialRender() {
+  private onLoad() {
     if (!this.chat) this.chat = chatStore.getChat(this.chatId);
+    this.updateModel();
     this.updateDisabled();
+    this.fullRender();
+    this.scrollToBottom();
+  }
+
+  private fullRender() {
     this.bodyElement.replaceChildren(
       ...(this.chat?.messages.map((message) =>
         createElement(MessageElement, { message }),
       ) || []),
     );
-    this.scrollTo({ top: this.scrollHeight });
+  }
+
+  private updateModel() {
+    const model = chatStore.getChatLastModel(this.chatId);
+    if (
+      model &&
+      InstalledModelsSubject.current().some(
+        (instance) => instance.name === model,
+      )
+    )
+      SelectedModelSubject.next(model);
   }
 
   private updateDisabled() {
@@ -144,5 +149,10 @@ export class ChatView extends HTMLElement {
 
   private getScrollBottom() {
     return this.scrollHeight - this.clientHeight - this.scrollTop;
+  }
+
+  private scrollToBottom() {
+    this.scrollTo({ top: this.scrollHeight });
+    this.previousScrollTop = this.scrollTop;
   }
 }

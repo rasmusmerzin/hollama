@@ -59,7 +59,15 @@ export class ChatStore extends EventTarget {
 
   pushMessage(
     chatId: string,
-    { id, role, model, content, created, updated }: Partial<ChatMessage> = {},
+    {
+      id,
+      role,
+      model,
+      content,
+      thinking,
+      created,
+      updated,
+    }: Partial<ChatMessage> = {},
   ): ChatMessage | undefined {
     const chat = this.getChat(chatId);
     if (!chat) return undefined;
@@ -68,7 +76,15 @@ export class ChatStore extends EventTarget {
     if (!content) content = "";
     if (!created) created = new Date().toISOString();
     if (!updated) updated = created;
-    const message = { id, role, model, content, created, updated };
+    const message: ChatMessage = {
+      id,
+      role,
+      model,
+      content,
+      thinking,
+      created,
+      updated,
+    };
     chat.updated = new Date().toISOString();
     chat.messages.push(message);
     this.moveChatToTop(chatId);
@@ -77,12 +93,17 @@ export class ChatStore extends EventTarget {
     return message;
   }
 
-  appendLastMessage(chatId: string, content: string): ChatMessage | undefined {
+  appendLastMessage(
+    chatId: string,
+    content: string,
+    thinking?: string,
+  ): ChatMessage | undefined {
     const chat = this.getChat(chatId);
     if (!chat) return undefined;
     const message = chat.messages[chat.messages.length - 1];
     if (!message) return undefined;
     message.content += content;
+    if (thinking) message.thinking = (message.thinking || "") + thinking;
     message.updated = chat.updated = new Date().toISOString();
     database.then((db) => db.put("chats", chat));
     this.dispatchEvent(new ChatAppendEvent(chat, message));

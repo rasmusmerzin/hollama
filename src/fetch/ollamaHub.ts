@@ -43,7 +43,7 @@ export async function getAvailableModels(): Promise<Model[]> {
       .map((label) => ({ label }));
     const categories = Array.from(
       capabilityElements,
-      (e) => e.textContent?.trim() || "",
+      (e) => e.textContent?.trim().toLowerCase() || "",
     ).filter(Boolean);
     return { name, description, tags, categories };
   });
@@ -64,7 +64,7 @@ export async function getModelDetails(model: string): Promise<Model> {
     doc.getElementById("summary")?.nextElementSibling?.children || [],
   )
     .filter((e) => !e.hasAttribute("x-test-size"))
-    .map((e) => e.textContent?.trim() || "")
+    .map((e) => e.textContent?.trim().toLowerCase() || "")
     .filter(Boolean);
   const anchors = Array.from(
     doc.querySelector("section")?.querySelectorAll("a") || [],
@@ -77,7 +77,7 @@ export async function getModelDetails(model: string): Promise<Model> {
       const [_modelName, label] = a.href
         .substring(a.href.lastIndexOf("/") + 1)
         .split(":");
-      if (!label || label === "latest") return null!;
+      if (!label) return null!;
       if (a.nextElementSibling?.textContent?.trim().toLowerCase() === "latest")
         latestTag = label;
       let size: number | undefined;
@@ -89,7 +89,11 @@ export async function getModelDetails(model: string): Promise<Model> {
       }
       const context = contextElement?.textContent?.trim();
       const input =
-        inputElement?.textContent?.trim().replace(/\s+/g, " ").split(",") || [];
+        inputElement?.textContent
+          ?.trim()
+          .replace(/\s+/g, "")
+          .toLowerCase()
+          .split(",") || [];
       return { label, size, context, input };
     })
     .filter(Boolean);

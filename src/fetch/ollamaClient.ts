@@ -28,7 +28,7 @@ export type ChatRole = "system" | "user" | "assistant" | "tool";
 export interface ChatMessagePart {
   model: string;
   created_at: string;
-  message: { role: ChatRole; content: string };
+  message: { role: ChatRole; content: string; thinking?: string };
   done: boolean;
   total_duration?: number;
   load_duration?: number;
@@ -71,17 +71,19 @@ export async function pullModel(
 export async function generateChatMessage({
   model,
   messages,
+  think,
   signal,
   callback,
 }: {
   model: string;
   messages: { role: ChatRole; content: string }[];
+  think?: boolean;
   signal?: AbortSignal;
   callback: (part: ChatMessagePart) => any;
 }): Promise<void> {
   const url = new URL("/api/chat", origin);
   messages = messages.map(({ role, content }) => ({ role, content }));
-  const body = JSON.stringify({ model, messages });
+  const body = JSON.stringify({ model, messages, think });
   const response = await fetch(url, { method: "POST", body, signal });
   if (!response.body) return;
   const reader = response.body.getReader();

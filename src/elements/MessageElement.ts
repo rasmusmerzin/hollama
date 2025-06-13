@@ -4,6 +4,7 @@ import { parseThinking } from "../parser";
 
 @tag("message-element")
 export class MessageElement extends HTMLElement {
+  private modelElement: HTMLElement;
   private thinkingElement: HTMLElement;
   private contentElement: HTMLElement;
 
@@ -15,11 +16,17 @@ export class MessageElement extends HTMLElement {
     this.#message = message;
     this.id = message ? `msg-${message.id}` : "";
     this.contentElement.innerText = message?.content || "";
+    this.modelElement.innerText = message?.model || "";
     if (message) {
       this.setAttribute("role", message.role);
-      const { thinking, content } = parseThinking(message.content);
-      this.thinkingElement.innerText = thinking;
-      this.contentElement.innerText = content;
+      if (message.thinking) {
+        this.thinkingElement.innerText = message.thinking.trim();
+        this.contentElement.innerText = message.content.trim();
+      } else {
+        const { thinking, content } = parseThinking(message.content);
+        this.thinkingElement.innerText = thinking.trim();
+        this.contentElement.innerText = content.trim();
+      }
     } else {
       this.thinkingElement.innerText = this.contentElement.innerText = "";
       this.removeAttribute("role");
@@ -29,6 +36,7 @@ export class MessageElement extends HTMLElement {
   constructor() {
     super();
     this.replaceChildren(
+      (this.modelElement = createElement("div", { className: "model" })),
       (this.thinkingElement = createElement("div", { className: "thinking" })),
       (this.contentElement = createElement("div", { className: "content" })),
     );

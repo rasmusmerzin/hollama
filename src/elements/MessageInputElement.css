@@ -25,6 +25,7 @@ message-input-element {
     > .actions {
       padding: 0 8px 8px;
       display: flex;
+      align-items: center;
       gap: 8px;
       > div {
         flex: 1;
@@ -52,6 +53,16 @@ message-input-element {
           }
         }
       }
+    }
+  }
+  &:not([categories~="thinking"]) {
+    toggle-element.think {
+      display: none;
+    }
+  }
+  &:not([input~="image"]) {
+    button.add {
+      display: none;
     }
   }
 }

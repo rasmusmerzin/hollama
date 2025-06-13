@@ -21,6 +21,7 @@ import {
 } from "../services/models";
 import { stripObject } from "../utils/stripObject";
 import { throttle } from "../utils/throttle";
+import { capitalize } from "../utils/capitalize";
 
 export function ModelsModal() {
   let listBody: ModalWindowBodyElement;
@@ -133,6 +134,7 @@ export function ModelsModal() {
       return detailsBody.niche.replaceChildren(
         createElement("div", { className: "center" }, "Model not found."),
       );
+    const tags = model.tags.filter((tag) => tag.label !== "latest");
     detailsBody.niche.replaceChildren(
       createElement("h2", { className: "name" }, [
         createElement("span", {}, model.name),
@@ -141,10 +143,10 @@ export function ModelsModal() {
         ),
       ]),
       createElement("p", {}, model.description),
-      ...(model.tags.length
+      ...(tags.length
         ? [
             createElement(ModalWindowHeaderElement, { label: "Tags" }),
-            ...model.tags.map((tag, i) => {
+            ...tags.map((tag, i) => {
               const progress =
                 tag.downloaded != null
                   ? tag.downloaded / (tag.size || 1)
@@ -159,13 +161,13 @@ export function ModelsModal() {
                       ? `${formatBytes(tag.downloaded)}/${formatBytes(tag.size)}`
                       : tag.size && formatBytes(tag.size),
                     tag.context,
-                    tag.input?.join(", "),
+                    tag.input?.map(capitalize).join(", "),
                   ]
                     .filter(Boolean)
                     .join(" • "),
                   join: [
                     ...(i > 0 ? ["top"] : []),
-                    ...(i < model.tags.length - 1 ? ["bottom"] : []),
+                    ...(i < tags.length - 1 ? ["bottom"] : []),
                   ].join(" "),
                 },
                 progress != null

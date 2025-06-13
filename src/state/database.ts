@@ -15,6 +15,7 @@ export interface ChatMessage {
   role: ChatRole;
   model?: string;
   content: string;
+  thinking?: string;
   created: string;
   updated: string;
 }

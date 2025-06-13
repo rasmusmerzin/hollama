@@ -1,10 +1,13 @@
 import "./MessageInputElement.css";
 import { ICON_ADD, ICON_ARROW_UPWARD, ICON_MIC, ICON_SPINNER } from "../icons";
+import { SelectedModelDetailsSubject } from "../state/SelectedModelSubject";
+import { ToggleElement } from "./ToggleElement";
 
 @tag("message-input-element")
 export class MessageInputElement extends HTMLElement {
   private textareaElement: HTMLTextAreaElement;
   private submitButton: HTMLButtonElement;
+  private thinkToggle: ToggleElement;
   private control?: AbortController;
 
   get value() {
@@ -31,6 +34,29 @@ export class MessageInputElement extends HTMLElement {
     else this.submitButton.innerHTML = ICON_ARROW_UPWARD;
     this.updateDisabled();
   }
+  get think() {
+    if (!this.categories.includes("thinking")) return undefined;
+    return this.thinkToggle.checked;
+  }
+  get categories(): string[] {
+    const value = this.getAttribute("categories");
+    if (!value) return [];
+    return value.split(" ").filter(Boolean);
+  }
+  set categories(categories: string[]) {
+    if (categories?.length)
+      this.setAttribute("categories", categories.join(" "));
+    else this.removeAttribute("categories");
+  }
+  get input(): string[] {
+    const value = this.getAttribute("input");
+    if (!value) return [];
+    return value.split(" ").filter(Boolean);
+  }
+  set input(input: string[]) {
+    if (input?.length) this.setAttribute("input", input.join(" "));
+    else this.removeAttribute("input");
+  }
 
   constructor() {
     super();
@@ -43,7 +69,12 @@ export class MessageInputElement extends HTMLElement {
           onkeydown: this.onKeydown.bind(this),
         })),
         createElement("div", { className: "actions" }, [
-          createElement("button", { innerHTML: ICON_ADD }),
+          createElement("button", { className: "add", innerHTML: ICON_ADD }),
+          (this.thinkToggle = createElement(
+            ToggleElement,
+            { className: "think" },
+            "Think",
+          )),
           createElement("div"),
           createElement("button", { innerHTML: ICON_MIC }),
           (this.submitButton = createElement("button", {
@@ -61,6 +92,10 @@ export class MessageInputElement extends HTMLElement {
     this.control = new AbortController();
     this.onInput();
     addEventListener("resize", this.resizeTextarea.bind(this), this.control);
+    SelectedModelDetailsSubject.subscribe((details) => {
+      this.categories = details?.categories || [];
+      this.input = details?.input || [];
+    }, null);
   }
 
   disconnectedCallback() {

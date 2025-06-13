@@ -1,0 +1,30 @@
+toggle-element {
+  display: inline-block;
+  -webkit-user-select: none;
+  user-select: none;
+  word-break: keep-all;
+  position: relative;
+  padding: 8px 12px;
+  font-size: 14px;
+  line-height: 16px;
+  border-radius: 16px;
+  cursor: pointer;
+  &::before {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: inherit;
+    opacity: 0.5;
+    border: 1px solid var(--foreground);
+    border-radius: inherit;
+  }
+  &[checked] {
+    font-weight: bold;
+    color: var(--background-0);
+    background: var(--foreground);
+  }
+}
