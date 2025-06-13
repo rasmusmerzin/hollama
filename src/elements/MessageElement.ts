@@ -1,6 +1,6 @@
 import "./MessageElement.css";
 import { ChatMessage } from "../state/database";
-import { parseThinking } from "../parser";
+import { md, parseThinking } from "../parser";
 
 @tag("message-element")
 export class MessageElement extends HTMLElement {
@@ -20,12 +20,12 @@ export class MessageElement extends HTMLElement {
     if (message) {
       this.setAttribute("role", message.role);
       if (message.thinking) {
-        this.thinkingElement.innerText = message.thinking.trim();
-        this.contentElement.innerText = message.content.trim();
+        this.thinkingElement.innerHTML = md.render(message.thinking.trim());
+        this.contentElement.innerHTML = md.render(message.content.trim());
       } else {
         const { thinking, content } = parseThinking(message.content);
-        this.thinkingElement.innerText = thinking.trim();
-        this.contentElement.innerText = content.trim();
+        this.thinkingElement.innerHTML = md.render(thinking.trim());
+        this.contentElement.innerHTML = md.render(content.trim());
       }
     } else {
       this.thinkingElement.innerText = this.contentElement.innerText = "";

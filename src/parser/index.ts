@@ -1,3 +1,7 @@
+import markdownit from "markdown-it";
+import hljs from "highlight.js";
+import "highlight.js/styles/github-dark.css";
+
 export function parseThinking(text: string): {
   thinking: string;
   content: string;
@@ -5,7 +9,7 @@ export function parseThinking(text: string): {
   let isThinking = false;
   const thinking: string[] = [];
   const content: string[] = [];
-  forEveryLine(text, (line) => {
+  text.split("\n").forEach((line) => {
     if (line == "<think>") isThinking = true;
     else if (line == "</think>") isThinking = false;
     else if (isThinking) thinking.push(line);
@@ -14,18 +18,15 @@ export function parseThinking(text: string): {
   return { thinking: thinking.join("\n"), content: content.join("\n") };
 }
 
-function forEveryLine(
-  text: string,
-  callback: (line: string, index: number) => any,
-): void {
-  let line = "";
-  let index = 0;
-  for (const char of text) {
-    if (char == "\n") {
-      callback(line, index);
-      line = "";
-      index++;
-    } else line += char;
-  }
-  if (line) callback(line, index);
-}
+export const md = markdownit({
+  highlight: function (str, lang) {
+    if (lang && hljs.getLanguage(lang)) {
+      try {
+        return hljs.highlight(str, { language: lang }).value;
+      } catch (error) {
+        console.error(`Error highlighting code: ${error}`);
+      }
+    }
+    return "";
+  },
+});

@@ -13,10 +13,13 @@
     "@tauri-apps/api": "2",
     "@tauri-apps/plugin-http": "^2.4.4",
     "@tauri-apps/plugin-opener": "2",
-    "idb": "8"
+    "idb": "8",
+    "markdown-it": "14"
   },
   "devDependencies": {
     "@tauri-apps/cli": "2",
+    "@types/markdown-it": "14",
+    "highlight.js": "11",
     "typescript": "5.8",
     "vite": "6"
   }

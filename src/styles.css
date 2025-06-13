@@ -71,7 +71,6 @@
   border: none;
   box-sizing: border-box;
   color: var(--foreground);
-  font-family: inherit;
   margin: 0;
   padding: 0;
 }
