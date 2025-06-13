@@ -54,9 +54,6 @@ side-bar-entry-element {
   &:not(:hover):not([hover]) > .actions {
     display: none;
   }
-  &.active {
-    --bg: var(--background-2);
-  }
   &:not(.active) {
     cursor: pointer;
     &:hover {
@@ -72,7 +69,10 @@ side-bar-entry-element {
     }
   }
   @media (max-width: 640px) {
-    background: var(--background-1s);
+    --bg: var(--background-1s);
+  }
+  &.active {
+    --bg: var(--background-2);
   }
 }
 

@@ -45,8 +45,9 @@ export function startChat({
             thinking: part.message.thinking,
           });
         else
-          chatStore.appendLastMessage(
+          chatStore.appendMessage(
             chat.id,
+            message.id,
             part.message.content,
             part.message.thinking,
           );
@@ -98,8 +99,9 @@ export async function continueChat({
             thinking: part.message.thinking,
           });
         else
-          chatStore.appendLastMessage(
+          chatStore.appendMessage(
             chat.id,
+            message.id,
             part.message.content,
             part.message.thinking,
           );

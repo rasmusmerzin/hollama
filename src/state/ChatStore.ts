@@ -105,14 +105,15 @@ export class ChatStore extends EventTarget {
     return message;
   }
 
-  appendLastMessage(
+  appendMessage(
     chatId: string,
+    messageId: string,
     content: string,
     thinking?: string,
   ): ChatMessage | undefined {
     const chat = this.getChat(chatId);
     if (!chat) return undefined;
-    const message = chat.messages[chat.messages.length - 1];
+    const message = chat.messages.find((msg) => msg.id === messageId);
     if (!message) return undefined;
     message.content += content;
     if (thinking) message.thinking = (message.thinking || "") + thinking;
