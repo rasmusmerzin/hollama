@@ -24,7 +24,10 @@ import { throttle } from "../utils/throttle";
 import { capitalize } from "../utils/capitalize";
 
 export function ModelsModal() {
-  let listBody: ModalWindowBodyElement;
+  let infoElement: HTMLElement;
+  let downloadsElement: HTMLElement;
+  let installedElement: HTMLElement;
+  let availableElement: HTMLElement;
   let detailsBody: ModalWindowBodyElement;
   let titleBar: ModalWindowTitleBarElement;
   let control: AbortController | undefined;
@@ -41,7 +44,12 @@ export function ModelsModal() {
         onsearch: renderThrottled,
       })),
       createElement("div", { className: "container" }, [
-        (listBody = createElement(ModalWindowBodyElement)),
+        createElement(ModalWindowBodyElement, {}, [
+          (infoElement = createElement("div", { className: "info" })),
+          (downloadsElement = createElement("div")),
+          (installedElement = createElement("div")),
+          (availableElement = createElement("div")),
+        ]),
         (detailsBody = createElement(ModalWindowBodyElement, {
           className: "details hidden",
         })),
@@ -100,31 +108,50 @@ export function ModelsModal() {
       else if (model.tags.some((tag) => tag.installed)) installed.push(model);
       else available.push(model);
     }
-    if (installed.length || available.length)
-      listBody.niche.replaceChildren(
+    if (installed.length || available.length) {
+      downloadsElement.replaceChildren(
         ...(downloading.length
           ? [
               createElement(ModalWindowHeaderElement, { label: "Downloading" }),
               ...constructModelEntries(downloading),
             ]
           : []),
-        ...(installed.length
-          ? [
-              createElement(ModalWindowHeaderElement, { label: "Installed" }),
-              ...constructModelEntries(installed),
-            ]
-          : []),
-        ...(available.length
-          ? [
-              createElement(ModalWindowHeaderElement, { label: "Available" }),
-              ...constructModelEntries(available),
-            ]
-          : []),
       );
-    else
-      listBody.niche.replaceChildren(
+      const installedKeys = installed.map((model) => model.name).join(",");
+      if (installedElement.getAttribute("keys") !== installedKeys) {
+        installedElement.setAttribute("keys", installedKeys);
+        installedElement.replaceChildren(
+          ...(installed.length
+            ? [
+                createElement(ModalWindowHeaderElement, { label: "Installed" }),
+                ...constructModelEntries(installed),
+              ]
+            : []),
+        );
+      }
+      const availableKeys = available.map((model) => model.name).join(",");
+      if (availableElement.getAttribute("keys") !== availableKeys) {
+        availableElement.setAttribute("keys", availableKeys);
+        availableElement.replaceChildren(
+          ...(available.length
+            ? [
+                createElement(ModalWindowHeaderElement, { label: "Available" }),
+                ...constructModelEntries(available),
+              ]
+            : []),
+        );
+      }
+      infoElement.replaceChildren();
+    } else {
+      downloadsElement.replaceChildren();
+      installedElement.replaceChildren();
+      installedElement.removeAttribute("keys");
+      availableElement.replaceChildren();
+      availableElement.removeAttribute("keys");
+      infoElement.replaceChildren(
         createElement("div", { className: "center" }, "No models found."),
       );
+    }
   }
 
   function renderDetails() {
