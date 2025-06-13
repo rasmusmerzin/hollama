@@ -42,9 +42,16 @@ export class DropdownMenuElement extends HTMLElement {
   get items() {
     return this.#items;
   }
+  get width() {
+    return Number(this.style.getPropertyValue("--width"));
+  }
+  set width(value: number) {
+    this.style.setProperty("--width", value.toString());
+  }
 
   constructor() {
     super();
+    this.width = 200;
     this.replaceChildren(
       (this.containerElement = createElement("div", {
         className: "container",

@@ -19,7 +19,7 @@ export function startChat({
   );
   const title =
     (delimIndex === -1
-      ? content
+      ? content.trim()
       : content.substring(0, delimIndex + 1).trim()
     ).substring(0, 128) || "New Chat";
   let chat: Chat | undefined;

@@ -31,7 +31,7 @@ dropdown-menu-element {
     left: 50%;
     top: calc(100% + 8px);
     transform: translateX(-50%);
-    width: 200px;
+    width: calc(var(--width) * 1px);
     border-radius: 12px;
     background: var(--background-2s);
     padding: 6px;

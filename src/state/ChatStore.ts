@@ -41,6 +41,18 @@ export class ChatStore extends EventTarget {
     return true;
   }
 
+  renameChat(chatId: string, title: string): boolean {
+    const chat = this.getChat(chatId);
+    if (!chat) return false;
+    if (chat.title.trim() === title.trim()) return false;
+    chat.title = title.trim();
+    chat.updated = new Date().toISOString();
+    this.moveChatToTop(chatId);
+    database.then((db) => db.put("chats", chat));
+    this.dispatchEvent(new ChatRenameEvent(chat));
+    return true;
+  }
+
   lockChat(chatId: string): boolean {
     const chat = this.getChat(chatId);
     if (!chat || chat.locked) return false;
@@ -143,6 +155,12 @@ export class ChatLoadEvent extends Event {
 export class ChatCreateEvent extends Event {
   constructor(readonly chat: Chat) {
     super("create");
+  }
+}
+
+export class ChatRenameEvent extends Event {
+  constructor(readonly chat: Chat) {
+    super("rename");
   }
 }
 

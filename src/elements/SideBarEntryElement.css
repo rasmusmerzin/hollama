@@ -1,18 +1,74 @@
 side-bar-entry-element {
+  --bg: var(--background-1);
   display: block;
-  padding: 8px;
-  background: var(--background-1);
+  background: var(--bg);
   border-radius: 8px;
-  white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
+  padding: 4px;
+  position: relative;
+  > input {
+    border-radius: 4px;
+    padding: 4px;
+    width: 100%;
+    &:disabled {
+      pointer-events: none;
+    }
+  }
+  &::after {
+    content: "";
+    position: absolute;
+    background: linear-gradient(to right, #0000, var(--bg));
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 32px;
+  }
+  > .actions {
+    background: linear-gradient(to right, #0000, #0000, var(--bg), var(--bg));
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    padding: 0 6px 0 64px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    > button {
+      background: var(--bg);
+      width: 24px;
+      height: 24px;
+      border-radius: 8px;
+      justify-content: center;
+      display: flex;
+      align-items: center;
+      &.active {
+        background: var(--background-2);
+      }
+      svg {
+        width: 16px;
+        height: 16px;
+      }
+    }
+  }
+  &:not(:hover):not([hover]) > .actions {
+    display: none;
+  }
   &.active {
-    background: var(--background-2);
+    --bg: var(--background-2);
   }
   &:not(.active) {
     cursor: pointer;
     &:hover {
       filter: brightness(0.9);
+    }
+  }
+  &[renaming] {
+    &::after {
+      display: none;
+    }
+    > .actions {
+      display: none;
     }
   }
   @media (max-width: 640px) {
