@@ -2,6 +2,7 @@ import "./MessageInputElement.css";
 import { ICON_ADD, ICON_ARROW_UPWARD, ICON_MIC, ICON_SPINNER } from "../icons";
 import { SelectedModelDetailsSubject } from "../state/SelectedModelSubject";
 import { ToggleElement } from "./ToggleElement";
+import { MessageInputSubject } from "../state/MessageInputSubject";
 
 @tag("message-input-element")
 export class MessageInputElement extends HTMLElement {
@@ -70,11 +71,15 @@ export class MessageInputElement extends HTMLElement {
         })),
         createElement("div", { className: "actions" }, [
           createElement("button", { className: "add", innerHTML: ICON_ADD }),
-          (this.thinkToggle = createElement(
-            ToggleElement,
-            { className: "think" },
-            "Think",
-          )),
+          (this.thinkToggle = createElement(ToggleElement, {
+            className: "think",
+            innerText: "Think",
+            onchange: () =>
+              MessageInputSubject.update((state) => ({
+                ...state,
+                think: this.thinkToggle.checked,
+              })),
+          })),
           createElement("div"),
           createElement("button", { innerHTML: ICON_MIC }),
           (this.submitButton = createElement("button", {
@@ -95,7 +100,10 @@ export class MessageInputElement extends HTMLElement {
     SelectedModelDetailsSubject.subscribe((details) => {
       this.categories = details?.categories || [];
       this.input = details?.input || [];
-    }, null);
+    }, this.control);
+    MessageInputSubject.subscribe((state) => {
+      this.thinkToggle.checked = state.think;
+    }, this.control);
   }
 
   disconnectedCallback() {
