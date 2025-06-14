@@ -1,6 +1,7 @@
 import { Chat, ChatMessage } from "../state/database";
 import { chatStore } from "../state/ChatStore";
 import { generateChatMessage } from "../fetch/ollamaClient";
+import { trackGeneratorHandle } from "../state/GeneratorHandlesSubject";
 
 export function startChat({
   model,
@@ -24,17 +25,20 @@ export function startChat({
     ).substring(0, 128) || "New Chat";
   let chat: Chat | undefined;
   let message: ChatMessage | undefined;
+  const control = new AbortController();
+  signal?.addEventListener("abort", () => control.abort());
   return new Promise((resolve, reject) =>
     generateChatMessage({
       model,
       messages: [{ role: "user", content }],
       think,
-      signal,
+      signal: control.signal,
       callback: (part) => {
         if (!chat) {
           chat = chatStore.createChat(title);
           chatStore.pushMessage(chat.id, { role: "user", content });
           chatStore.lockChat(chat.id);
+          trackGeneratorHandle(chat.id, control);
           resolve(chat);
         }
         if (!message || message.role !== part.message.role)
@@ -55,7 +59,8 @@ export function startChat({
     })
       .catch(reject)
       .finally(() => {
-        if (chat) chatStore.unlockChat(chat.id);
+        control.abort();
+        if (chat?.locked) chatStore.unlockChat(chat.id);
         reject();
       }),
   );
@@ -66,31 +71,27 @@ export async function continueChat({
   model,
   userMessage: content,
   think,
-  signal,
 }: {
   chatId: string;
   model: string;
   userMessage: string;
   think?: boolean;
-  signal?: AbortSignal;
 }): Promise<void> {
   const chat = chatStore.getChat(chatId);
   if (!chat) return;
-  let resolved = false;
   let message: ChatMessage | undefined;
+  chatStore.pushMessage(chat.id, { role: "user", content });
+  chatStore.lockChat(chat.id);
+  const control = new AbortController();
+  trackGeneratorHandle(chat.id, control);
   return new Promise((resolve, reject) =>
     generateChatMessage({
       model,
-      messages: [...chat.messages, { role: "user", content }],
+      messages: chat.messages,
       think,
-      signal,
+      signal: control.signal,
       callback: (part) => {
-        if (!resolved) {
-          resolved = true;
-          resolve();
-          chatStore.pushMessage(chat.id, { role: "user", content });
-          chatStore.lockChat(chat.id);
-        }
+        resolve();
         if (!message || message.role !== part.message.role)
           message = chatStore.pushMessage(chat.id, {
             model,
@@ -109,7 +110,8 @@ export async function continueChat({
     })
       .catch(reject)
       .finally(() => {
-        if (chat) chatStore.unlockChat(chat.id);
+        control.abort();
+        if (chat.locked) chatStore.unlockChat(chat.id);
         reject();
       }),
   );

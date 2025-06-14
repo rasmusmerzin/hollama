@@ -8,7 +8,6 @@ toggle-element {
   font-size: 14px;
   line-height: 16px;
   border-radius: 16px;
-  cursor: pointer;
   transition: filter 200ms;
   &::before {
     content: "";
@@ -28,11 +27,17 @@ toggle-element {
     color: var(--background-0);
     background: var(--foreground);
   }
-  &:hover {
-    filter: brightness(0.9);
+  &:not([disabled]) {
+    cursor: pointer;
+    &:hover {
+      filter: brightness(0.9);
+    }
+  }
+  &[disabled] {
+    opacity: 0.5;
   }
 }
 
-:root[dark] toggle-element:hover {
+:root[dark] toggle-element:not([disabled]):hover {
   filter: brightness(1.5);
 }

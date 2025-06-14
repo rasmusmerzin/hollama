@@ -6,6 +6,7 @@ import { MessageElement } from "../elements/MessageElement";
 import { MessageInputElement } from "../elements/MessageInputElement";
 import { SelectedModelSubject } from "../state/SelectedModelSubject";
 import { continueChat } from "../services/chats";
+import { GeneratorHandlesSubject } from "../state/GeneratorHandlesSubject";
 
 @tag("chat-view")
 export class ChatView extends HTMLElement {
@@ -25,6 +26,7 @@ export class ChatView extends HTMLElement {
       (this.messageInput = createElement(MessageInputElement, {
         onsubmit: this.onSubmit.bind(this),
         onresize: this.onResize.bind(this),
+        onstop: () => this.chatControl?.abort(),
       })),
     );
   }
@@ -59,30 +61,24 @@ export class ChatView extends HTMLElement {
       this.updateDisabled.bind(this),
       this.control,
     );
+    GeneratorHandlesSubject.subscribe((handles) => {
+      this.chatControl = handles[this.chatId];
+      this.messageInput.stoppable = !!this.chatControl;
+    }, this.control);
   }
 
   disconnectedCallback() {
     this.control?.abort();
     delete this.control;
-    this.chatControl?.abort();
-    delete this.chatControl;
   }
 
   private async onSubmit() {
-    this.chatControl?.abort();
-    this.chatControl = new AbortController();
-    const { value, think } = this.messageInput;
+    const { value: userMessage, think } = this.messageInput;
+    const { chatId } = this;
     const model = SelectedModelSubject.current()!;
     try {
       this.messageInput.loading = true;
-      await continueChat({
-        chatId: this.chatId,
-        model,
-        userMessage: value,
-        think,
-        signal: this.chatControl.signal,
-      });
-      delete this.chatControl;
+      await continueChat({ chatId, model, userMessage, think });
       this.messageInput.value = "";
     } catch (error) {
       // TODO: Alert

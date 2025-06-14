@@ -1,5 +1,11 @@
 import "./MessageInputElement.css";
-import { ICON_ADD, ICON_ARROW_UPWARD, ICON_MIC, ICON_SPINNER } from "../icons";
+import {
+  ICON_ADD,
+  ICON_ARROW_UPWARD,
+  ICON_MIC,
+  ICON_SPINNER,
+  ICON_STOP,
+} from "../icons";
 import { SelectedModelDetailsSubject } from "../state/SelectedModelSubject";
 import { ToggleElement } from "./ToggleElement";
 import { MessageInputSubject } from "../state/MessageInputSubject";
@@ -10,6 +16,8 @@ export class MessageInputElement extends HTMLElement {
   private submitButton: HTMLButtonElement;
   private thinkToggle: ToggleElement;
   private control?: AbortController;
+
+  onstop?: () => any;
 
   get value() {
     return this.textareaElement.value;
@@ -31,8 +39,8 @@ export class MessageInputElement extends HTMLElement {
     return this.#loading;
   }
   set loading(value: boolean) {
-    if ((this.#loading = value)) this.submitButton.innerHTML = ICON_SPINNER;
-    else this.submitButton.innerHTML = ICON_ARROW_UPWARD;
+    this.#loading = value;
+    this.updateSubmitIcon();
     this.updateDisabled();
   }
   get think() {
@@ -57,6 +65,15 @@ export class MessageInputElement extends HTMLElement {
   set input(input: string[]) {
     if (input?.length) this.setAttribute("input", input.join(" "));
     else this.removeAttribute("input");
+  }
+  get stoppable() {
+    return this.hasAttribute("stoppable");
+  }
+  set stoppable(value: boolean) {
+    if (value) this.setAttribute("stoppable", "");
+    else this.removeAttribute("stoppable");
+    this.updateSubmitIcon();
+    this.updateDisabled();
   }
 
   constructor() {
@@ -85,7 +102,10 @@ export class MessageInputElement extends HTMLElement {
           (this.submitButton = createElement("button", {
             className: "primary",
             innerHTML: ICON_ARROW_UPWARD,
-            onclick: () => this.dispatchEvent(new Event("submit")),
+            onclick: () =>
+              this.stoppable
+                ? this.onstop?.()
+                : this.dispatchEvent(new Event("submit")),
           })),
         ]),
       ]),
@@ -125,13 +145,21 @@ export class MessageInputElement extends HTMLElement {
     }
   }
 
+  private updateSubmitIcon() {
+    if (this.stoppable) this.submitButton.innerHTML = ICON_STOP;
+    else if (this.#loading) this.submitButton.innerHTML = ICON_SPINNER;
+    else this.submitButton.innerHTML = ICON_ARROW_UPWARD;
+  }
+
   private updateDisabled() {
     this.textareaElement.disabled = this.#loading;
     this.querySelectorAll("button").forEach(
       (button) => (button.disabled = this.#disabled || this.#loading),
     );
+    this.thinkToggle.disabled = this.#disabled || this.#loading;
     this.submitButton.disabled =
       this.#disabled || this.#loading || !this.value.trim();
+    if (this.stoppable) this.submitButton.disabled = false;
   }
 
   private resizeTextarea() {

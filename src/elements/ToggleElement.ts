@@ -13,6 +13,13 @@ export class ToggleElement extends HTMLElement {
     else this.removeAttribute("checked");
     this.dispatchEvent(new Event("change", { bubbles: true }));
   }
+  get disabled() {
+    return this.hasAttribute("disabled");
+  }
+  set disabled(value: boolean) {
+    if (value) this.setAttribute("disabled", "");
+    else this.removeAttribute("disabled");
+  }
 
   constructor() {
     super();
@@ -32,12 +39,13 @@ export class ToggleElement extends HTMLElement {
   }
 
   private onClick() {
+    if (this.disabled) return;
     this.checked = !this.checked;
   }
 
   private onKeydown(event: KeyboardEvent) {
-    if (event.key === "Enter" || event.key === " ") {
+    if (this.disabled) return;
+    if (event.key === "Enter" || event.key === " ")
       this.checked = !this.checked;
-    }
   }
 }
