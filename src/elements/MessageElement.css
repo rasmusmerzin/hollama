@@ -35,10 +35,12 @@ message-element {
     margin: 16px 0 8px;
   }
   p {
-    margin: 0 0 8px;
-    &:last-child {
-      margin: 0;
-    }
+    margin: 8px 0;
+  }
+  code {
+    border-radius: 4px;
+    padding: 0 4px;
+    background: var(--background-2);
   }
   pre {
     padding: 8px;
@@ -48,9 +50,17 @@ message-element {
     overflow: auto;
     line-height: 16px;
     font-size: 12px;
+    code {
+      padding: 0;
+      background: none;
+    }
     * {
       color: #fff;
     }
+  }
+  ol,
+  ul {
+    margin: 8px 0 8px 24px;
   }
   > .content,
   > .thinking {
@@ -60,8 +70,5 @@ message-element {
     > *:last-child {
       margin-bottom: 0;
     }
-  }
-  ul {
-    list-style: inside;
   }
 }
