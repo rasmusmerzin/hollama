@@ -1,6 +1,7 @@
-import { ICON_MORE_HORIZ } from "../icons";
+import { ICON_MORE_HORIZ, ICON_PLAY } from "../icons";
 import { chatStore } from "../state/ChatStore";
 import { Chat } from "../state/database";
+import { GeneratorHandlesSubject } from "../state/GeneratorHandlesSubject";
 import { DropdownMenuElement } from "./DropdownMenuElement";
 import "./SideBarEntryElement.css";
 
@@ -39,6 +40,7 @@ export class SideBarEntryElement extends HTMLElement {
       setTimeout(() => history.replaceState({}, "", `/chat/${this.chat!.id}`));
     };
     this.replaceChildren(
+      createElement("div", { className: "icon", innerHTML: ICON_PLAY }),
       (this.inputElement = createElement("input", {
         onfocus: this.onFocus.bind(this),
         onblur: this.onBlur.bind(this),
@@ -65,6 +67,10 @@ export class SideBarEntryElement extends HTMLElement {
       this.onStateChange.bind(this),
       this.control,
     );
+    GeneratorHandlesSubject.subscribe((handles) => {
+      if (handles[this.chat!.id]) this.setAttribute("running", "");
+      else this.removeAttribute("running");
+    }, this.control);
   }
 
   disconnectedCallback() {

@@ -6,10 +6,20 @@ side-bar-entry-element {
   overflow: hidden;
   padding: 4px;
   position: relative;
+  display: flex;
+  align-items: center;
+  > .icon {
+    width: 16px;
+    height: 16px;
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
   > input {
     border-radius: 4px;
     padding: 4px;
-    width: 100%;
+    flex: 1;
     &:disabled {
       pointer-events: none;
     }
@@ -61,12 +71,18 @@ side-bar-entry-element {
     }
   }
   &[renaming] {
+    > .icon {
+      display: none;
+    }
     &::after {
       display: none;
     }
     > .actions {
       display: none;
     }
+  }
+  &:not([running]) > .icon {
+    display: none;
   }
   @media (max-width: 640px) {
     --bg: var(--background-1s);
