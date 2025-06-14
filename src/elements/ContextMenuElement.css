@@ -1,0 +1,49 @@
+context-menu-element {
+  z-index: 1000;
+  position: fixed;
+  width: 0;
+  height: 0;
+  > .shadow {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #0000;
+  }
+  > .container {
+    position: absolute;
+    z-index: 1;
+    width: calc(var(--width) * 1px);
+    border-radius: 12px;
+    background: var(--background-2s);
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 0 8px #0004;
+    overflow: auto;
+    > div {
+      height: 1px;
+      background: #8888;
+      margin: 4px 0;
+    }
+    > button {
+      padding: 6px 8px;
+      text-align: left;
+      background: var(--background-2s);
+      border-radius: 8px;
+    }
+  }
+  &:not([flipped-x]) > .container {
+    left: 100%;
+  }
+  &[flipped-x] > .container {
+    right: 100%;
+  }
+  &:not([flipped-y]) > .container {
+    top: 100%;
+  }
+  &[flipped-y] > .container {
+    bottom: 100%;
+  }
+}

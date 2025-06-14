@@ -123,6 +123,18 @@ export class ChatStore extends EventTarget {
     return message;
   }
 
+  popMessage(chatId: string, messageId: string): ChatMessage | undefined {
+    const chat = this.getChat(chatId);
+    if (!chat) return undefined;
+    const fromIndex = chat.messages.findIndex((msg) => msg.id === messageId);
+    if (fromIndex < 0) return undefined;
+    const [message] = chat.messages.splice(fromIndex, 1);
+    chat.updated = new Date().toISOString();
+    database.then((db) => db.put("chats", chat));
+    this.dispatchEvent(new ChatPopEvent(chat, message, fromIndex));
+    return message;
+  }
+
   private moveChatToTop(chatId: string) {
     const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);
     if (chatIndex === -1 || chatIndex === 0) return;
@@ -201,6 +213,16 @@ export class ChatAppendEvent extends Event {
     readonly message: ChatMessage,
   ) {
     super("append");
+  }
+}
+
+export class ChatPopEvent extends Event {
+  constructor(
+    readonly chat: Chat,
+    readonly message: ChatMessage,
+    readonly fromIndex: number,
+  ) {
+    super("pop");
   }
 }
 

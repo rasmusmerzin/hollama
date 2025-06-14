@@ -1,6 +1,11 @@
 import "./ChatView.css";
 import { Chat } from "../state/database";
-import { ChatAppendEvent, ChatPushEvent, chatStore } from "../state/ChatStore";
+import {
+  ChatAppendEvent,
+  ChatPopEvent,
+  ChatPushEvent,
+  chatStore,
+} from "../state/ChatStore";
 import { InstalledModelsSubject } from "../state/ModelsSubject";
 import { MessageElement } from "../elements/MessageElement";
 import { MessageInputElement } from "../elements/MessageInputElement";
@@ -52,6 +57,11 @@ export class ChatView extends HTMLElement {
       this.control,
     );
     chatStore.addEventListener(
+      "pop",
+      this.onChatPop.bind(this) as any,
+      this.control,
+    );
+    chatStore.addEventListener(
       "lock",
       this.updateDisabled.bind(this),
       this.control,
@@ -89,7 +99,7 @@ export class ChatView extends HTMLElement {
 
   private onChatPush({ chat, message }: ChatPushEvent) {
     if (this.chatId !== chat.id) return;
-    this.bodyElement.append(createElement(MessageElement, { message }));
+    this.bodyElement.append(createElement(MessageElement, { chat, message }));
     if (this.atBottom) this.scrollToBottom();
   }
 
@@ -99,6 +109,11 @@ export class ChatView extends HTMLElement {
     if (!(element instanceof MessageElement)) return;
     element.message = message;
     if (this.atBottom) this.scrollToBottom();
+  }
+
+  private onChatPop({ chat, message }: ChatPopEvent) {
+    if (this.chatId !== chat.id) return;
+    this.bodyElement.querySelector(`#msg-${message.id}`)?.remove();
   }
 
   private previousScrollTop = this.scrollTop;
@@ -124,7 +139,7 @@ export class ChatView extends HTMLElement {
   private fullRender() {
     this.bodyElement.replaceChildren(
       ...(this.chat?.messages.map((message) =>
-        createElement(MessageElement, { message }),
+        createElement(MessageElement, { chat: this.chat, message }),
       ) || []),
     );
   }

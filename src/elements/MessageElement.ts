@@ -1,5 +1,7 @@
 import "./MessageElement.css";
-import { ChatMessage } from "../state/database";
+import { Chat, ChatMessage } from "../state/database";
+import { ContextMenuElement } from "./ContextMenuElement";
+import { chatStore } from "../state/ChatStore";
 import { md, parseThinking } from "../parser";
 
 @tag("message-element")
@@ -8,6 +10,7 @@ export class MessageElement extends HTMLElement {
   private thinkingElement: HTMLElement;
   private contentElement: HTMLElement;
 
+  chat?: Chat;
   #message?: ChatMessage;
   get message() {
     return this.#message;
@@ -35,10 +38,68 @@ export class MessageElement extends HTMLElement {
 
   constructor() {
     super();
+    this.oncontextmenu = this.openContextMenu.bind(this);
     this.replaceChildren(
       (this.modelElement = createElement("div", { className: "model" })),
       (this.thinkingElement = createElement("div", { className: "thinking" })),
       (this.contentElement = createElement("div", { className: "content" })),
+    );
+  }
+
+  openContextMenu() {
+    this.classList.add("active");
+    document.body.append(
+      createElement(ContextMenuElement, {
+        width: 150,
+        ondisconnect: () => {
+          this.classList.remove("active");
+        },
+        items: [
+          ...(this.message?.thinking && this.message.content
+            ? [
+                {
+                  label: "Copy All",
+                  action: () =>
+                    this.message &&
+                    navigator.clipboard.writeText(
+                      [this.message.thinking, this.message.content]
+                        .filter(Boolean)
+                        .join("\n\n"),
+                    ),
+                },
+                {
+                  label: "Copy Content",
+                  action: () =>
+                    this.message &&
+                    navigator.clipboard.writeText(this.message.content),
+                },
+                {
+                  label: "Copy Thinking",
+                  action: () =>
+                    this.message &&
+                    navigator.clipboard.writeText(this.message.thinking || ""),
+                },
+              ]
+            : [
+                {
+                  label: "Copy",
+                  action: () =>
+                    this.message &&
+                    navigator.clipboard.writeText(
+                      this.message.content || this.message.thinking || "",
+                    ),
+                },
+              ]),
+          "div",
+          {
+            label: "Delete",
+            action: () =>
+              this.chat &&
+              this.message &&
+              chatStore.popMessage(this.chat.id, this.message.id),
+          },
+        ],
+      }),
     );
   }
 }
