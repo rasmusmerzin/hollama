@@ -1,6 +1,7 @@
 import "./MessageElement.css";
 import { Chat, ChatMessage } from "../state/database";
 import { ContextMenuElement } from "./ContextMenuElement";
+import { ICON_COPY } from "../icons";
 import { chatStore } from "../state/ChatStore";
 import { md, parseThinking } from "../parser";
 
@@ -30,6 +31,7 @@ export class MessageElement extends HTMLElement {
         this.thinkingElement.innerHTML = md.render(thinking.trim());
         this.contentElement.innerHTML = md.render(content.trim());
       }
+      this.renderCodeHandles();
     } else {
       this.thinkingElement.innerText = this.contentElement.innerText = "";
       this.removeAttribute("role");
@@ -46,7 +48,18 @@ export class MessageElement extends HTMLElement {
     );
   }
 
-  openContextMenu() {
+  private renderCodeHandles() {
+    const pres = this.contentElement.getElementsByTagName("pre");
+    for (const pre of pres)
+      pre.append(
+        createElement("button", {
+          innerHTML: ICON_COPY,
+          onclick: () => navigator.clipboard.writeText(pre.innerText),
+        }),
+      );
+  }
+
+  private openContextMenu() {
     this.classList.add("active");
     document.body.append(
       createElement(ContextMenuElement, {

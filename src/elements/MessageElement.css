@@ -44,12 +44,39 @@ message-element {
   }
   pre {
     padding: 8px;
-    background: #333;
+    background: #222;
     border-radius: 8px;
     margin: 8px 0 8px;
     overflow: auto;
     line-height: 16px;
     font-size: 12px;
+    position: relative;
+    button {
+      -webkit-user-select: none;
+      user-select: none;
+      background: #333;
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      border-radius: 8px;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      &:active {
+        transition: none;
+        filter: brightness(2) !important;
+      }
+      svg {
+        fill: #fff;
+        width: 16px;
+        height: 16px;
+      }
+    }
+    &:not(:hover) button {
+      display: none;
+    }
     code {
       padding: 0;
       background: none;
