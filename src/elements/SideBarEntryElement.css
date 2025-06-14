@@ -1,5 +1,6 @@
 side-bar-entry-element {
   --bg: var(--background-1);
+  flex-shrink: 0;
   display: block;
   background: var(--bg);
   border-radius: 8px;

@@ -73,21 +73,24 @@ export async function generateChatMessage({
   messages,
   think,
   signal,
-  callback,
+  onok,
+  onpart,
 }: {
   model: string;
   messages: { role: ChatRole; content: string }[];
   think?: boolean;
   signal?: AbortSignal;
-  callback: (part: ChatMessagePart) => any;
+  onok?: () => any;
+  onpart: (part: ChatMessagePart) => any;
 }): Promise<void> {
   const url = new URL("/api/chat", origin);
   messages = messages.map(({ role, content }) => ({ role, content }));
   const body = JSON.stringify({ model, messages, think });
   const response = await fetch(url, { method: "POST", body, signal });
+  if (response.ok && onok) setTimeout(onok);
   if (!response.body) return;
   const reader = response.body.getReader();
-  await readJsonStream(reader, callback);
+  await readJsonStream(reader, onpart);
 }
 
 async function readJsonStream<T extends object>(

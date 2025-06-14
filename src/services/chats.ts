@@ -33,7 +33,7 @@ export function startChat({
       messages: [{ role: "user", content }],
       think,
       signal: control.signal,
-      callback: (part) => {
+      onpart(part) {
         if (!chat) {
           chat = chatStore.createChat(title);
           chatStore.pushMessage(chat.id, { role: "user", content });
@@ -80,17 +80,20 @@ export async function continueChat({
   const chat = chatStore.getChat(chatId);
   if (!chat) return;
   let message: ChatMessage | undefined;
-  chatStore.pushMessage(chat.id, { role: "user", content });
   chatStore.lockChat(chat.id);
   const control = new AbortController();
   trackGeneratorHandle(chat.id, control);
   return new Promise((resolve, reject) =>
     generateChatMessage({
       model,
-      messages: chat.messages,
+      messages: [...chat.messages, { role: "user", content }],
       think,
       signal: control.signal,
-      callback: (part) => {
+      onok() {
+        resolve();
+        chatStore.pushMessage(chat.id, { role: "user", content });
+      },
+      onpart(part) {
         resolve();
         if (!message || message.role !== part.message.role)
           message = chatStore.pushMessage(chat.id, {

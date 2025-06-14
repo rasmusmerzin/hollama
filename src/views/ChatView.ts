@@ -114,6 +114,7 @@ export class ChatView extends HTMLElement {
   private onChatPop({ chat, message }: ChatPopEvent) {
     if (this.chatId !== chat.id) return;
     this.bodyElement.querySelector(`#msg-${message.id}`)?.remove();
+    this.atBottom = this.getScrollBottom() < 100;
   }
 
   private previousScrollTop = this.scrollTop;
