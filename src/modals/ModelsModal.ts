@@ -87,12 +87,17 @@ export function ModelsModal() {
 
   function renderList() {
     let models = Object.values(ModelsSubject.current());
-    const search = (titleBar.search || "").split(" ").filter(Boolean);
+    const search = (titleBar.search || "")
+      .toLowerCase()
+      .split(" ")
+      .filter(Boolean);
     models = models.filter((model) => {
+      const categories = model.categories.join(" ").toLowerCase();
       for (const term of search) {
         if (
-          !model.name.toLowerCase().includes(term.toLowerCase()) &&
-          !model.description.toLowerCase().includes(term.toLowerCase())
+          !model.name.toLowerCase().includes(term) &&
+          !model.description.toLowerCase().includes(term) &&
+          !categories.includes(term)
         ) {
           return false;
         }
@@ -262,14 +267,17 @@ export function ModelsModal() {
               { className: "name", style: "margin-right: 4px" },
               model.name,
             ),
+            ...model.categories.map((category) =>
+              createElement(TagElement, {}, category),
+            ),
             ...model.tags
-              .filter((tag) => tag.label !== "latest")
+              .filter(
+                (tag) =>
+                  (tag.label !== "latest" && tag.installed) ||
+                  tag.downloaded != null,
+              )
               .map((tag) =>
-                createElement(
-                  TagElement,
-                  { disabled: !tag.installed && tag.downloaded == null },
-                  tag.label,
-                ),
+                createElement(TagElement, { disabled: true }, tag.label),
               ),
           ],
         ),
