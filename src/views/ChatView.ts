@@ -33,6 +33,7 @@ export class ChatView extends HTMLElement {
     this.control?.abort();
     this.control = new AbortController();
     this.onLoad();
+    addEventListener("resize", this.onResize.bind(this), this.control);
     this.addEventListener("scroll", this.onScroll.bind(this), {
       passive: true,
       signal: this.control.signal,

@@ -119,14 +119,14 @@ export class MessageInputElement extends HTMLElement {
   private onKeydown(event: KeyboardEvent) {
     const modifiers =
       event.shiftKey || event.ctrlKey || event.altKey || event.metaKey;
-    if (event.key === "Enter" && !modifiers) {
+    if (event.key === "Enter" && !modifiers && !this.#disabled) {
       event.preventDefault();
       if (this.value.trim()) this.dispatchEvent(new Event("submit"));
     }
   }
 
   private updateDisabled() {
-    this.textareaElement.disabled = this.#disabled || this.#loading;
+    this.textareaElement.disabled = this.#loading;
     this.querySelectorAll("button").forEach(
       (button) => (button.disabled = this.#disabled || this.#loading),
     );
