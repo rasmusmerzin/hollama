@@ -20,7 +20,6 @@ import {
   syncModelDetails,
 } from "../services/models";
 import { stripObject } from "../utils/stripObject";
-import { throttle } from "../utils/throttle";
 import { capitalize } from "../utils/capitalize";
 
 export function ModelsModal() {
@@ -32,8 +31,6 @@ export function ModelsModal() {
   let titleBar: ModalWindowTitleBarElement;
   let control: AbortController | undefined;
 
-  const renderThrottled = throttle(render, 100);
-
   return createElement(
     ModalWindowElement,
     { className: "models", onconnect, ondisconnect, height: 1080 },
@@ -41,7 +38,7 @@ export function ModelsModal() {
       (titleBar = createElement(ModalWindowTitleBarElement, {
         label: "Models",
         searchable: true,
-        onsearch: renderThrottled,
+        onsearch: render,
       })),
       createElement("div", { className: "container" }, [
         createElement(ModalWindowBodyElement, {}, [
@@ -61,7 +58,7 @@ export function ModelsModal() {
     control?.abort();
     control = new AbortController();
     onStateChange();
-    ModelsSubject.subscribe(renderThrottled, control);
+    ModelsSubject.subscribe(render, control);
     addEventListener("statechange", onStateChange, control);
   }
 
@@ -77,7 +74,7 @@ export function ModelsModal() {
       detailsBody.classList.remove("hidden");
       syncModelDetails(submodal);
     }
-    renderThrottled();
+    render();
   }
 
   function render() {

@@ -33,7 +33,7 @@ export function startModelDownload(name: string): Promise<void> {
       });
       if (status === "success") syncInstalledModels();
     })
-      .then(() => resolve())
+      .then(resolve)
       .catch(reject)
       .finally(() => {
         const current = ModelDownloadsSubject.current();
