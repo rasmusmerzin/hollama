@@ -26,9 +26,9 @@ modal-window-entry-element {
     filter: brightness(0.95);
   }
   > div:first-child {
-    flex-shrink: 0;
     overflow: hidden;
     > .label {
+      flex-shrink: 0;
       word-break: keep-all;
     }
     > .description {

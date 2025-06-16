@@ -1,14 +1,8 @@
 import "./MessageInputElement.css";
-import {
-  ICON_ADD,
-  ICON_ARROW_UPWARD,
-  ICON_MIC,
-  ICON_SPINNER,
-  ICON_STOP,
-} from "../icons";
+import { ICON_ADD, ICON_ARROW_UPWARD, ICON_SPINNER, ICON_STOP } from "../icons";
+import { MessageInputSubject } from "../state/MessageInputSubject";
 import { SelectedModelDetailsSubject } from "../state/SelectedModelSubject";
 import { ToggleElement } from "./ToggleElement";
-import { MessageInputSubject } from "../state/MessageInputSubject";
 
 @tag("message-input-element")
 export class MessageInputElement extends HTMLElement {
@@ -98,7 +92,6 @@ export class MessageInputElement extends HTMLElement {
               })),
           })),
           createElement("div"),
-          createElement("button", { innerHTML: ICON_MIC }),
           (this.submitButton = createElement("button", {
             className: "primary",
             innerHTML: ICON_ARROW_UPWARD,
