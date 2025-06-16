@@ -10,6 +10,7 @@ export function PreferencesModal() {
   let control: AbortController | undefined;
   let darkModeSwitch: SwitchElement;
   let smoothCornersSwitch: SwitchElement;
+  let addressInput: HTMLInputElement;
 
   return createElement(
     ModalWindowElement,
@@ -17,6 +18,19 @@ export function PreferencesModal() {
     [
       createElement(ModalWindowTitleBarElement, { label: "Preferences" }),
       createElement(ModalWindowBodyElement, {}, [
+        createElement(ModalWindowHeaderElement, {
+          title: "Connection",
+          description: "Set the address of the Ollama instance.",
+        }),
+        createElement(
+          ModalWindowEntryElement,
+          { label: "Instance Address" },
+          (addressInput = createElement("input", {
+            style: "text-align: right",
+            disabled: true,
+            value: PreferencesSubject.current().instanceAddress,
+          })),
+        ),
         createElement(ModalWindowHeaderElement, {
           title: "Appearance",
           description: "Customize the look and feel of the application.",
@@ -54,10 +68,14 @@ export function PreferencesModal() {
   function onconnect() {
     control?.abort();
     control = new AbortController();
-    PreferencesSubject.subscribe(({ darkMode, smoothCorners }) => {
-      darkModeSwitch.checked = darkMode;
-      smoothCornersSwitch.checked = smoothCorners;
-    }, control);
+    PreferencesSubject.subscribe(
+      ({ darkMode, smoothCorners, instanceAddress }) => {
+        darkModeSwitch.checked = darkMode;
+        smoothCornersSwitch.checked = smoothCorners;
+        addressInput.value = instanceAddress;
+      },
+      control,
+    );
   }
 
   function ondisconnect() {

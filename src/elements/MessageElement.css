@@ -1,6 +1,10 @@
 message-element {
   display: block;
   margin: 0 0 16px;
+  background: var(--background);
+  &.active {
+    filter: brightness(0.95);
+  }
   > .model {
     opacity: 0.5;
     font-size: 0.8em;
@@ -8,10 +12,12 @@ message-element {
     user-select: none;
   }
   > .thinking {
-    margin: 0 0 8px;
     opacity: 0.5;
-    padding: 0 0 0 8px;
     border-left: 1px solid var(--foreground);
+    padding: 0 0 0 8px;
+    &:not(:empty) {
+      margin: 0 0 8px;
+    }
   }
   &[role="system"],
   &[role="tool"],
@@ -98,4 +104,8 @@ message-element {
       margin-bottom: 0;
     }
   }
+}
+
+:root[dark] message-element.active {
+  filter: brightness(1.2);
 }

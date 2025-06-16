@@ -3,11 +3,13 @@ import { Subject } from "./Subject";
 export interface Preferences {
   darkMode: boolean;
   smoothCorners: boolean;
+  instanceAddress: string;
 }
 
 export const PREFERENCES: Preferences = Object.freeze({
   darkMode: false,
   smoothCorners: true,
+  instanceAddress: "http://localhost:11434",
 });
 
 export const PreferencesSubject = new Subject<Preferences>(

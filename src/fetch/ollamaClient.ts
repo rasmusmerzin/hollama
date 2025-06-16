@@ -1,4 +1,4 @@
-const origin = "http://localhost:11434";
+import { PreferencesSubject } from "../state/PreferencesSubject";
 
 export interface ModelInstance {
   name: string;
@@ -39,6 +39,7 @@ export interface ChatMessagePart {
 }
 
 export async function getInstalledModels(): Promise<ModelInstance[]> {
+  const origin = PreferencesSubject.current().instanceAddress;
   const url = new URL("/api/tags", origin);
   const response = await fetch(url);
   if (!response.ok) throw new Error("Failed to fetch installed models");
@@ -47,6 +48,7 @@ export async function getInstalledModels(): Promise<ModelInstance[]> {
 }
 
 export async function deleteModel(model: string): Promise<void> {
+  const origin = PreferencesSubject.current().instanceAddress;
   const url = new URL("/api/delete", origin);
   const body = JSON.stringify({ model });
   const response = await fetch(url, { method: "DELETE", body });
@@ -57,6 +59,7 @@ export async function pullModel(
   model: string,
   callback?: (progress: PullProgress) => any,
 ): Promise<void> {
+  const origin = PreferencesSubject.current().instanceAddress;
   const url = new URL("/api/pull", origin);
   const stream = !!callback;
   const body = JSON.stringify({ model, stream });
@@ -83,6 +86,7 @@ export async function generateChatMessage({
   onok?: () => any;
   onpart: (part: ChatMessagePart) => any;
 }): Promise<void> {
+  const origin = PreferencesSubject.current().instanceAddress;
   const url = new URL("/api/chat", origin);
   messages = messages.map(({ role, content }) => ({ role, content }));
   const body = JSON.stringify({ model, messages, think });
