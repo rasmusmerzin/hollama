@@ -7,6 +7,8 @@ import { ToggleElement } from "./ToggleElement";
 @tag("message-input-element")
 export class MessageInputElement extends HTMLElement {
   private textareaElement: HTMLTextAreaElement;
+  private containerElement: HTMLElement;
+  private actionsElement: HTMLElement;
   private submitButton: HTMLButtonElement;
   private thinkToggle: ToggleElement;
   private control?: AbortController;
@@ -73,35 +75,46 @@ export class MessageInputElement extends HTMLElement {
   constructor() {
     super();
     this.replaceChildren(
-      createElement("div", { className: "container" }, [
-        (this.textareaElement = createElement("textarea", {
-          placeholder: "Ask anything",
-          rows: 2,
-          oninput: this.onInput.bind(this),
-          onkeydown: this.onKeydown.bind(this),
-        })),
-        createElement("div", { className: "actions" }, [
-          createElement("button", { className: "add", innerHTML: ICON_ADD }),
-          (this.thinkToggle = createElement(ToggleElement, {
-            className: "think",
-            innerText: "Think",
-            onchange: () =>
-              MessageInputSubject.update((state) => ({
-                ...state,
-                think: this.thinkToggle.checked,
+      (this.containerElement = createElement(
+        "div",
+        { className: "container", onclick: this.onContainerClick.bind(this) },
+        [
+          (this.textareaElement = createElement("textarea", {
+            placeholder: "Ask anything",
+            rows: 2,
+            oninput: this.onInput.bind(this),
+            onkeydown: this.onKeydown.bind(this),
+          })),
+          (this.actionsElement = createElement(
+            "div",
+            { className: "actions" },
+            [
+              createElement("button", {
+                className: "add",
+                innerHTML: ICON_ADD,
+              }),
+              (this.thinkToggle = createElement(ToggleElement, {
+                className: "think",
+                innerText: "Think",
+                onchange: () =>
+                  MessageInputSubject.update((state) => ({
+                    ...state,
+                    think: this.thinkToggle.checked,
+                  })),
               })),
-          })),
-          createElement("div"),
-          (this.submitButton = createElement("button", {
-            className: "primary",
-            innerHTML: ICON_ARROW_UPWARD,
-            onclick: () =>
-              this.stoppable
-                ? this.onstop?.()
-                : this.dispatchEvent(new Event("submit")),
-          })),
-        ]),
-      ]),
+              createElement("div"),
+              (this.submitButton = createElement("button", {
+                className: "primary",
+                innerHTML: ICON_ARROW_UPWARD,
+                onclick: () =>
+                  this.stoppable
+                    ? this.onstop?.()
+                    : this.dispatchEvent(new Event("submit")),
+              })),
+            ],
+          )),
+        ],
+      )),
     );
   }
 
@@ -122,6 +135,12 @@ export class MessageInputElement extends HTMLElement {
   disconnectedCallback() {
     this.control?.abort();
     delete this.control;
+  }
+
+  private onContainerClick(event: MouseEvent) {
+    if (!(event.target instanceof HTMLElement)) return;
+    const containers = [this.containerElement, this.actionsElement];
+    if (containers.includes(event.target)) this.textareaElement.focus();
   }
 
   private onInput() {

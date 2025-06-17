@@ -8,13 +8,19 @@ export interface SelectedModelDetails {
   input: string[];
 }
 
-export const SelectedModelSubject = new Subject<string | null>(null);
+export const SelectedModelSubject = new Subject<string | null>(
+  localStorage.getItem("selected_model"),
+);
 
 export const SelectedModelDetailsSubject =
   new Subject<SelectedModelDetails | null>(null);
 
 setTimeout(() => {
-  SelectedModelSubject.subscribe(updateSelectedModelSubject, null);
+  SelectedModelSubject.subscribe((selectedModel) => {
+    if (selectedModel) localStorage.setItem("selected_model", selectedModel);
+    else localStorage.removeItem("selected_model");
+    updateSelectedModelSubject();
+  }, null);
   ModelsSubject.subscribe(updateSelectedModelSubject, null);
 });
 

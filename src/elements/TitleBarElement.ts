@@ -1,11 +1,11 @@
 import "./TitleBarElement.css";
 import { ICON_CLOSE, ICON_DOCK_TO_RIGHT } from "../icons";
+import { InstalledModelsSubject } from "../state/ModelsSubject";
 import { SelectElement } from "./SelectElement";
+import { SelectedModelSubject } from "../state/SelectedModelSubject";
 import { SideBarSubject } from "../state/SideBarSubject";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { onDoubleClick } from "../utils/onDoubleClick";
-import { InstalledModelsSubject } from "../state/ModelsSubject";
-import { SelectedModelSubject } from "../state/SelectedModelSubject";
 
 @tag("title-bar-element")
 export class TitleBarElement extends HTMLElement {
@@ -30,8 +30,6 @@ export class TitleBarElement extends HTMLElement {
       createElement("div", { className: "center" }, [
         (this.selectElement = createElement(SelectElement, {
           onmousedown: stopPropagation,
-          onchange: () =>
-            SelectedModelSubject.next(this.selectElement.selected),
         })),
       ]),
       createElement("div", { className: "right" }, [
@@ -61,6 +59,8 @@ export class TitleBarElement extends HTMLElement {
     SelectedModelSubject.subscribe((selected) => {
       this.selectElement.selected = selected;
     }, this.control);
+    this.selectElement.onchange = () =>
+      SelectedModelSubject.next(this.selectElement.selected);
     onDoubleClick(
       this,
       () => this.appWindow.toggleMaximize(),
