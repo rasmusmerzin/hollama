@@ -91,7 +91,7 @@ export class ChatView extends HTMLElement {
       await continueChat({ chatId, model, userMessage, think });
       this.messageInput.value = "";
     } catch (error) {
-      // TODO: Alert
+      alert(error);
     } finally {
       this.messageInput.loading = false;
     }

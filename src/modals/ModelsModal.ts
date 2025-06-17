@@ -15,7 +15,7 @@ import { ModelsSubject } from "../state/ModelsSubject";
 import { TagElement } from "../elements/TagElement";
 import { formatBytes } from "../utils/bytes";
 import {
-  removeModel,
+  removeModelInstance,
   startModelDownload,
   syncModelDetails,
 } from "../services/models";
@@ -210,19 +210,18 @@ export function ModelsModal() {
                     ? createElement("button", {
                         className: "action",
                         innerHTML: ICON_DELETE,
-                        onclick: () => {
-                          removeModel(`${model.name}:${tag.label}`);
-                          if (model.latestTag === tag.label)
-                            removeModel(`${model.name}:latest`);
-                          else if (tag.label === "latest" && model.latestTag)
-                            removeModel(`${model.name}:${model.latestTag}`);
-                        },
+                        onclick: () =>
+                          removeModelInstance(model.name, tag.label).catch(
+                            alert,
+                          ),
                       })
                     : createElement("button", {
                         className: "action",
                         innerHTML: ICON_DOWNLOAD,
                         onclick: () =>
-                          startModelDownload(`${model.name}:${tag.label}`),
+                          startModelDownload(
+                            `${model.name}:${tag.label}`,
+                          ).catch(alert),
                       }),
               );
             }),

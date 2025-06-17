@@ -3,6 +3,7 @@ import {
   InstalledModelsSubject,
   ModelDetailsSubject,
   ModelDownloadsSubject,
+  ModelsSubject,
 } from "../state/ModelsSubject";
 import {
   deleteModel,
@@ -46,15 +47,27 @@ export function startModelDownload(name: string): Promise<void> {
   );
 }
 
-export async function removeModel(name: string): Promise<void> {
-  await deleteModel(name).catch(console.error);
-  await syncInstalledModels().catch(console.error);
-  const download = ModelDownloadsSubject.current()[name];
-  if (!download) return;
-  ModelDownloadsSubject.update((downloads) => {
-    delete downloads[name];
-    return downloads;
-  });
+export async function removeModelInstance(
+  modelName: string,
+  tagLabel: string,
+): Promise<void> {
+  const model = ModelsSubject.current()[modelName];
+  if (!model) throw new Error(`Model ${modelName} not found`);
+  let name = `${modelName}:${tagLabel}`;
+  if (isModelInstalled(name)) await deleteModel(name);
+  if (model.latestTag === tagLabel) {
+    name = `${model.name}:latest`;
+    if (isModelInstalled(name)) await deleteModel(name);
+  } else if (tagLabel === "latest" && model.latestTag) {
+    name = `${model.name}:${model.latestTag}`;
+    if (isModelInstalled(name)) await deleteModel(name);
+  }
+  syncInstalledModels();
+}
+
+export function isModelInstalled(name: string): boolean {
+  const installed = InstalledModelsSubject.current();
+  return installed.some((instance) => instance.name === name);
 }
 
 export async function syncModelDetails(name: string) {

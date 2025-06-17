@@ -40,7 +40,7 @@ export class LandingView extends HTMLElement {
       delete this.chatControl;
       if (!aborted) history.replaceState({}, "", `/chat/${chat.id}`);
     } catch (error) {
-      // TODO: Alert
+      alert(error);
     } finally {
       this.messageInput.loading = false;
     }
