@@ -40,7 +40,7 @@ export class LandingView extends HTMLElement {
       delete this.chatControl;
       if (!aborted) history.replaceState({}, "", `/chat/${chat.id}`);
     } catch (error) {
-      alert(error);
+      alert(`Couldn't connect to Ollama instance. ${error}`);
     } finally {
       this.messageInput.loading = false;
     }

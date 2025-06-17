@@ -19,7 +19,6 @@ import {
   startModelDownload,
   syncModelDetails,
 } from "../services/models";
-import { stripObject } from "../utils/stripObject";
 import { capitalize } from "../utils/capitalize";
 
 export function ModelsModal() {
@@ -212,7 +211,10 @@ export function ModelsModal() {
                         innerHTML: ICON_DELETE,
                         onclick: () =>
                           removeModelInstance(model.name, tag.label).catch(
-                            alert,
+                            (error) =>
+                              alert(
+                                `Couldn't connect to Ollama instance. ${error}`,
+                              ),
                           ),
                       })
                     : createElement("button", {
@@ -221,7 +223,11 @@ export function ModelsModal() {
                         onclick: () =>
                           startModelDownload(
                             `${model.name}:${tag.label}`,
-                          ).catch(alert),
+                          ).catch((error) =>
+                            alert(
+                              `Couldn't connect to Ollama instance. ${error}`,
+                            ),
+                          ),
                       }),
               );
             }),
@@ -286,7 +292,7 @@ export function ModelsModal() {
         onclick: () =>
           history.pushState(
             {
-              ...stripObject(history.state),
+              ...history.state,
               submodal: model.name,
               modalIndex: (history.state.modalIndex || 0) + 1,
             },

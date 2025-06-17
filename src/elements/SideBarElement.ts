@@ -2,7 +2,6 @@ import "./SideBarElement.css";
 import { SideBarBodyElement } from "./SideBarBodyElement";
 import { SideBarSubject } from "../state/SideBarSubject";
 import { SideBarTitleBarElement } from "./SideBarTitleBarElement";
-import { stripObject } from "../utils/stripObject";
 
 export const SIDE_BAR_BREAKPOINT = 640;
 
@@ -37,10 +36,7 @@ export class SideBarElement extends HTMLElement {
       if (!previous) return;
       if (previous.open !== open) {
         if (open && innerWidth < SIDE_BAR_BREAKPOINT && !sidebarOverlay)
-          history.pushState(
-            { ...stripObject(history.state), sidebarOverlay: true },
-            "",
-          );
+          history.pushState({ ...history.state, sidebarOverlay: true }, "");
         else if (!open && sidebarOverlay) history.back();
       }
     }, this.control);

@@ -3,7 +3,6 @@ import { DropdownMenuElement } from "./DropdownMenuElement";
 import { ICON_ADD_CHAT, ICON_MENU } from "../icons";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { onDoubleClick } from "../utils/onDoubleClick";
-import { stripObject } from "../utils/stripObject";
 
 @tag("side-bar-title-bar-element")
 export class SideBarTitleBarElement extends HTMLElement {
@@ -61,19 +60,16 @@ export class SideBarTitleBarElement extends HTMLElement {
         items: [
           {
             label: "Models",
-            action: () =>
-              history.pushState(stripObject(history.state), "", "#models"),
+            action: () => history.pushState(history.state, "", "#models"),
           },
           "div",
           {
             label: "Preferences",
-            action: () =>
-              history.pushState(stripObject(history.state), "", "#preferences"),
+            action: () => history.pushState(history.state, "", "#preferences"),
           },
           {
             label: "About Hollama",
-            action: () =>
-              history.pushState(stripObject(history.state), "", "#about"),
+            action: () => history.pushState(history.state, "", "#about"),
           },
         ],
       }),

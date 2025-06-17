@@ -3,7 +3,6 @@ import { ICON_CHEVRON_LEFT, ICON_CLOSE, ICON_SEARCH } from "../icons";
 import { TextInputElement } from "./TextInputElement";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { onDoubleClick } from "../utils/onDoubleClick";
-import { stripObject } from "../utils/stripObject";
 
 @tag("modal-window-title-bar-element")
 export class ModalWindowTitleBarElement extends HTMLElement {
@@ -113,10 +112,7 @@ export class ModalWindowTitleBarElement extends HTMLElement {
     if (history.state.searching != null) history.back();
     else {
       const modalIndex = (history.state.modalIndex || 0) + 1;
-      history.pushState(
-        { ...stripObject(history.state), searching: "", modalIndex },
-        "",
-      );
+      history.pushState({ ...history.state, searching: "", modalIndex }, "");
     }
   }
 
