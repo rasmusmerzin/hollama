@@ -1,6 +1,7 @@
 import "./styles.css";
 import "@merzin/element";
 import { AboutModal } from "./modals/AboutModal";
+import { AlertModal } from "./modals/AlertModal";
 import { ChatView } from "./views/ChatView";
 import { LandingView } from "./views/LandingView";
 import { ModelsModal } from "./modals/ModelsModal";
@@ -37,5 +38,15 @@ defineRoute("/chat/:chatId", ChatView);
 defineRoute("#preferences", PreferencesModal);
 defineRoute("#about", AboutModal);
 defineRoute("#models", ModelsModal);
+defineRoute("#alert", AlertModal);
 
 startRouter({ viewRoot: main, modalRoot: root });
+
+Object.assign(globalThis, {
+  alert: (message?: unknown) =>
+    history.pushState(
+      { ...history.state, message: String(message ?? "") },
+      "",
+      location.hash + "#alert",
+    ),
+});

@@ -213,7 +213,7 @@ export function ModelsModal() {
                           removeModelInstance(model.name, tag.label).catch(
                             (error) =>
                               alert(
-                                `Couldn't connect to Ollama instance. ${error}`,
+                                `Couldn't connect to Ollama instance.\n${error}`,
                               ),
                           ),
                       })
@@ -225,7 +225,7 @@ export function ModelsModal() {
                             `${model.name}:${tag.label}`,
                           ).catch((error) =>
                             alert(
-                              `Couldn't connect to Ollama instance. ${error}`,
+                              `Couldn't connect to Ollama instance.\n${error}`,
                             ),
                           ),
                       }),

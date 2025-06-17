@@ -91,7 +91,7 @@ export class ChatView extends HTMLElement {
       await continueChat({ chatId, model, userMessage, think });
       this.messageInput.value = "";
     } catch (error) {
-      alert(`Couldn't connect to Ollama instance. ${error}`);
+      alert(`Couldn't connect to Ollama instance.\n${error}`);
     } finally {
       this.messageInput.loading = false;
     }
