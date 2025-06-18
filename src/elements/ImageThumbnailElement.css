@@ -1,0 +1,29 @@
+image-thumbnail-element {
+  display: inline-block;
+  width: 48px;
+  height: 48px;
+  background-image: var(--image);
+  background-size: cover;
+  border-radius: 12px;
+  cursor: pointer;
+  position: relative;
+  &:not([deletable]) button.delete {
+    display: none;
+  }
+  button.delete {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 100%;
+    background: var(--background-1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    svg {
+      width: 12px;
+      height: 12px;
+    }
+  }
+}

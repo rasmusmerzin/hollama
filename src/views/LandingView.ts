@@ -26,13 +26,13 @@ export class LandingView extends HTMLElement {
   private async onSubmit() {
     this.chatControl?.abort();
     this.chatControl = new AbortController();
-    const { value, think } = this.messageInput;
+    const { message, think } = this.messageInput;
     const model = SelectedModelSubject.current()!;
     try {
       this.messageInput.loading = true;
       const chat = await startChat({
         model,
-        userMessage: value,
+        message,
         think,
         signal: this.chatControl.signal,
       });

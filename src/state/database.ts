@@ -16,6 +16,7 @@ export interface ChatMessage {
   model?: string;
   content: string;
   thinking?: string;
+  images?: string[];
   created: string;
   updated: string;
 }

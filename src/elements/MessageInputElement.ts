@@ -1,13 +1,17 @@
 import "./MessageInputElement.css";
+import { ChatRole } from "../fetch/ollamaClient";
 import { ICON_ADD, ICON_ARROW_UPWARD, ICON_SPINNER, ICON_STOP } from "../icons";
+import { ImageThumbnailElement } from "./ImageThumbnailElement";
 import { MessageInputSubject } from "../state/MessageInputSubject";
 import { SelectedModelDetailsSubject } from "../state/SelectedModelSubject";
 import { ToggleElement } from "./ToggleElement";
+import { fileToDataUrl, openFile } from "../utils/files";
 
 @tag("message-input-element")
 export class MessageInputElement extends HTMLElement {
   private textareaElement: HTMLTextAreaElement;
   private containerElement: HTMLElement;
+  private imagesElement: HTMLElement;
   private actionsElement: HTMLElement;
   private submitButton: HTMLButtonElement;
   private thinkToggle: ToggleElement;
@@ -61,6 +65,7 @@ export class MessageInputElement extends HTMLElement {
   set input(input: string[]) {
     if (input?.length) this.setAttribute("input", input.join(" "));
     else this.removeAttribute("input");
+    if (!input.includes("image")) this.images = [];
   }
   get stoppable() {
     return this.hasAttribute("stoppable");
@@ -71,6 +76,26 @@ export class MessageInputElement extends HTMLElement {
     this.updateSubmitIcon();
     this.updateDisabled();
   }
+  get images(): string[] {
+    const elements = this.imagesElement
+      .childNodes as NodeListOf<ImageThumbnailElement>;
+    return Array.from(elements, (element) => element.src);
+  }
+  set images(images: string[]) {
+    this.imagesElement.replaceChildren(
+      ...images.map((dataUrl) =>
+        createElement(ImageThumbnailElement, { deletable: true, src: dataUrl }),
+      ),
+    );
+  }
+  get message() {
+    const { value: content, images } = this;
+    return {
+      role: "user" as ChatRole,
+      content,
+      images: images?.length ? images : undefined,
+    };
+  }
 
   constructor() {
     super();
@@ -79,6 +104,7 @@ export class MessageInputElement extends HTMLElement {
         "div",
         { className: "container", onclick: this.onContainerClick.bind(this) },
         [
+          (this.imagesElement = createElement("div", { className: "images" })),
           (this.textareaElement = createElement("textarea", {
             placeholder: "Ask anything",
             rows: 2,
@@ -92,6 +118,16 @@ export class MessageInputElement extends HTMLElement {
               createElement("button", {
                 className: "add",
                 innerHTML: ICON_ADD,
+                onclick: () =>
+                  openFile({
+                    accept: "image/*",
+                    multiple: true,
+                    onchange: (files) =>
+                      Promise.all(files.map(fileToDataUrl)).then(
+                        (dataUrls) =>
+                          (this.images = [...this.images, ...dataUrls]),
+                      ),
+                  }),
               }),
               (this.thinkToggle = createElement(ToggleElement, {
                 className: "think",
@@ -137,9 +173,18 @@ export class MessageInputElement extends HTMLElement {
     delete this.control;
   }
 
+  clear() {
+    this.value = "";
+    this.images = [];
+  }
+
   private onContainerClick(event: MouseEvent) {
     if (!(event.target instanceof HTMLElement)) return;
-    const containers = [this.containerElement, this.actionsElement];
+    const containers = [
+      this.containerElement,
+      this.imagesElement,
+      this.actionsElement,
+    ];
     if (containers.includes(event.target)) this.textareaElement.focus();
   }
 
@@ -166,11 +211,14 @@ export class MessageInputElement extends HTMLElement {
   private updateDisabled() {
     this.textareaElement.disabled = this.#loading;
     this.querySelectorAll("button").forEach(
-      (button) => (button.disabled = this.#disabled || this.#loading),
+      (button) => (button.disabled = this.#loading),
     );
-    this.thinkToggle.disabled = this.#disabled || this.#loading;
+    this.thinkToggle.disabled = this.#loading;
     this.submitButton.disabled =
       this.#disabled || this.#loading || !this.value.trim();
+    const thumbnails = this.imagesElement
+      .childNodes as NodeListOf<ImageThumbnailElement>;
+    thumbnails.forEach((thumbnail) => (thumbnail.deletable = !this.#loading));
     if (this.stoppable) this.submitButton.disabled = false;
   }
 

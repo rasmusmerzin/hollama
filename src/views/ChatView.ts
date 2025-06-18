@@ -83,13 +83,13 @@ export class ChatView extends HTMLElement {
   }
 
   private async onSubmit() {
-    const { value: userMessage, think } = this.messageInput;
+    const { message, think } = this.messageInput;
     const { chatId } = this;
     const model = SelectedModelSubject.current()!;
     try {
       this.messageInput.loading = true;
-      await continueChat({ chatId, model, userMessage, think });
-      this.messageInput.value = "";
+      await continueChat({ chatId, model, message, think });
+      this.messageInput.clear();
     } catch (error) {
       alert(`Couldn't connect to Ollama instance.\n${error}`);
     } finally {

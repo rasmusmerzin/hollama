@@ -11,6 +11,11 @@ message-input-element {
   > .container {
     background: var(--background-1);
     border-radius: 20px;
+    > .images:not(:empty) {
+      padding: 12px 12px 0;
+      display: flex;
+      gap: 8px;
+    }
     > textarea {
       font-size: 14px;
       line-height: 16px;

@@ -2,12 +2,14 @@ import "./MessageElement.css";
 import { Chat, ChatMessage } from "../state/database";
 import { ContextMenuElement } from "./ContextMenuElement";
 import { ICON_COPY } from "../icons";
+import { ImageThumbnailElement } from "./ImageThumbnailElement";
 import { chatStore } from "../state/ChatStore";
 import { md, parseThinking } from "../parser";
 
 @tag("message-element")
 export class MessageElement extends HTMLElement {
   private modelElement: HTMLElement;
+  private imagesElement: HTMLElement;
   private thinkingElement: HTMLElement;
   private contentElement: HTMLElement;
 
@@ -21,6 +23,11 @@ export class MessageElement extends HTMLElement {
     this.id = message ? `msg-${message.id}` : "";
     this.contentElement.innerText = message?.content || "";
     this.modelElement.innerText = message?.model || "";
+    this.imagesElement.replaceChildren(
+      ...(message?.images || []).map((dataUrl) =>
+        createElement(ImageThumbnailElement, { src: dataUrl }),
+      ),
+    );
     if (message) {
       this.setAttribute("role", message.role);
       if (message.thinking) {
@@ -43,6 +50,7 @@ export class MessageElement extends HTMLElement {
     this.oncontextmenu = this.openContextMenu.bind(this);
     this.replaceChildren(
       (this.modelElement = createElement("div", { className: "model" })),
+      (this.imagesElement = createElement("div", { className: "images" })),
       (this.thinkingElement = createElement("div", { className: "thinking" })),
       (this.contentElement = createElement("div", { className: "content" })),
     );

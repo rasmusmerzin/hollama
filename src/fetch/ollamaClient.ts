@@ -1,4 +1,5 @@
 import { PreferencesSubject } from "../state/PreferencesSubject";
+import { stripDataUrl } from "../utils/files";
 
 export interface ModelInstance {
   name: string;
@@ -80,7 +81,12 @@ export async function generateChatMessage({
   onpart,
 }: {
   model: string;
-  messages: { role: ChatRole; content: string }[];
+  messages: {
+    role: ChatRole;
+    content: string;
+    thinking?: string;
+    images?: string[];
+  }[];
   think?: boolean;
   signal?: AbortSignal;
   onok?: () => any;
@@ -88,10 +94,17 @@ export async function generateChatMessage({
 }): Promise<void> {
   const origin = PreferencesSubject.current().instanceAddress;
   const url = new URL("/api/chat", origin);
-  messages = messages.map(({ role, content }) => ({ role, content }));
+  messages = messages.map(({ role, content, images, thinking }) => ({
+    role,
+    content,
+    thinking,
+    images: images?.map(stripDataUrl),
+  }));
   const body = JSON.stringify({ model, messages, think });
   const response = await fetch(url, { method: "POST", body, signal });
-  if (response.ok && onok) setTimeout(onok);
+  if (response.ok) {
+    if (onok) setTimeout(onok);
+  } else console.error("Error in chat generation:", response.statusText);
   if (!response.body) return;
   const reader = response.body.getReader();
   await readJsonStream(reader, onpart);

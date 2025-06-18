@@ -1,20 +1,20 @@
 import { Chat, ChatMessage } from "../state/database";
 import { chatStore } from "../state/ChatStore";
-import { generateChatMessage } from "../fetch/ollamaClient";
+import { ChatRole, generateChatMessage } from "../fetch/ollamaClient";
 import { trackGeneratorHandle } from "../state/GeneratorHandlesSubject";
 
 export function startChat({
   model,
-  userMessage: content,
+  message: inputMessage,
   think,
   signal,
 }: {
   model: string;
-  userMessage: string;
+  message: { role: ChatRole; content: string; images?: string[] };
   think?: boolean;
   signal?: AbortSignal;
 }): Promise<Chat> {
-  content = content.trim();
+  const content = (inputMessage.content || "").trim();
   const delimIndex = Array.from(content).findIndex((char) =>
     ".!?\n".includes(char),
   );
@@ -24,25 +24,25 @@ export function startChat({
       : content.substring(0, delimIndex + 1).trim()
     ).substring(0, 128) || "New Chat";
   let chat: Chat | undefined;
-  let message: ChatMessage | undefined;
+  let targetMessage: ChatMessage | undefined;
   const control = new AbortController();
   signal?.addEventListener("abort", () => control.abort());
   return new Promise((resolve, reject) =>
     generateChatMessage({
       model,
-      messages: [{ role: "user", content }],
+      messages: [inputMessage],
       think,
       signal: control.signal,
       onpart(part) {
         if (!chat) {
           chat = chatStore.createChat(title);
-          chatStore.pushMessage(chat.id, { role: "user", content });
+          chatStore.pushMessage(chat.id, inputMessage);
           chatStore.lockChat(chat.id);
           trackGeneratorHandle(chat.id, control);
           resolve(chat);
         }
-        if (!message || message.role !== part.message.role)
-          message = chatStore.pushMessage(chat.id, {
+        if (!targetMessage || targetMessage.role !== part.message.role)
+          targetMessage = chatStore.pushMessage(chat.id, {
             model,
             role: part.message.role,
             content: part.message.content,
@@ -51,7 +51,7 @@ export function startChat({
         else
           chatStore.appendMessage(
             chat.id,
-            message.id,
+            targetMessage.id,
             part.message.content,
             part.message.thinking,
           );
@@ -69,34 +69,34 @@ export function startChat({
 export async function continueChat({
   chatId,
   model,
-  userMessage: content,
+  message: inputMessage,
   think,
 }: {
   chatId: string;
   model: string;
-  userMessage: string;
+  message: { role: ChatRole; content: string; images?: string[] };
   think?: boolean;
 }): Promise<void> {
   const chat = chatStore.getChat(chatId);
   if (!chat) return;
-  let message: ChatMessage | undefined;
+  let targetMessage: ChatMessage | undefined;
   chatStore.lockChat(chat.id);
   const control = new AbortController();
   trackGeneratorHandle(chat.id, control);
   return new Promise((resolve, reject) =>
     generateChatMessage({
       model,
-      messages: [...chat.messages, { role: "user", content }],
+      messages: [...chat.messages, inputMessage],
       think,
       signal: control.signal,
       onok() {
         resolve();
-        chatStore.pushMessage(chat.id, { role: "user", content });
+        chatStore.pushMessage(chat.id, inputMessage);
       },
       onpart(part) {
         resolve();
-        if (!message || message.role !== part.message.role)
-          message = chatStore.pushMessage(chat.id, {
+        if (!targetMessage || targetMessage.role !== part.message.role)
+          targetMessage = chatStore.pushMessage(chat.id, {
             model,
             role: part.message.role,
             content: part.message.content,
@@ -105,7 +105,7 @@ export async function continueChat({
         else
           chatStore.appendMessage(
             chat.id,
-            message.id,
+            targetMessage.id,
             part.message.content,
             part.message.thinking,
           );

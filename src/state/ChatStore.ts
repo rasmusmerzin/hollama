@@ -77,6 +77,7 @@ export class ChatStore extends EventTarget {
       model,
       content,
       thinking,
+      images,
       created,
       updated,
     }: Partial<ChatMessage> = {},
@@ -94,6 +95,7 @@ export class ChatStore extends EventTarget {
       model,
       content,
       thinking,
+      images,
       created,
       updated,
     };
