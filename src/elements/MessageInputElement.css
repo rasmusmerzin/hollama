@@ -7,10 +7,10 @@ message-input-element {
   max-width: 100%;
   padding: 0 8px 8px;
   background: var(--background);
-  cursor: text;
   > .container {
     background: var(--background-1);
     border-radius: 20px;
+    cursor: text;
     > .images:not(:empty) {
       padding: 12px 12px 0;
       display: flex;

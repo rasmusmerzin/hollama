@@ -6,7 +6,7 @@ export class ChatStore extends EventTarget {
 
   constructor() {
     super();
-    this.laodFromDatabase();
+    this.init();
   }
 
   getChat(id: string): Chat | undefined {
@@ -149,6 +149,21 @@ export class ChatStore extends EventTarget {
     return message;
   }
 
+  async loadChatMessages(chatId: string) {
+    if (this.messages.has(chatId)) return;
+    const db = await database;
+    const messages = await db.getAllFromIndex("messages", "chatId", chatId);
+    this.messages.set(
+      chatId,
+      messages.sort((a, b) => {
+        if (a.created < b.created) return -1;
+        if (a.created > b.created) return 1;
+        return 0;
+      }),
+    );
+    this.dispatchEvent(new ChatLoadEvent(chatId));
+  }
+
   private moveChatToTop(chatId: string) {
     const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);
     if (chatIndex === -1 || chatIndex === 0) return;
@@ -157,29 +172,18 @@ export class ChatStore extends EventTarget {
     this.dispatchEvent(new ChatMoveEvent(chat, chatIndex, 0));
   }
 
-  private async laodFromDatabase() {
+  private async init() {
     const db = await database;
     const chats = await db.getAllFromIndex("chats", "updated");
     this.chats = chats.reverse();
-    for (const chat of this.chats) {
-      const messages = await db.getAllFromIndex("messages", "chatId", chat.id);
-      this.messages.set(
-        chat.id,
-        messages.sort((a, b) => {
-          if (a.created < b.created) return -1;
-          if (a.created > b.created) return 1;
-          return 0;
-        }),
-      );
-    }
-    this.dispatchEvent(new ChatLoadEvent(this.chats));
+    this.dispatchEvent(new Event("init"));
   }
 }
 
 export const chatStore = new ChatStore();
 
 export class ChatLoadEvent extends Event {
-  constructor(readonly chats: Chat[]) {
+  constructor(readonly chatId: string) {
     super("load");
   }
 }

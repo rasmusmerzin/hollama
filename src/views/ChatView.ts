@@ -1,6 +1,7 @@
 import "./ChatView.css";
 import {
   ChatAppendEvent,
+  ChatLoadEvent,
   ChatPopEvent,
   ChatPushEvent,
   chatStore,
@@ -37,13 +38,16 @@ export class ChatView extends HTMLElement {
   connectedCallback() {
     this.control?.abort();
     this.control = new AbortController();
-    this.onLoad();
     addEventListener("resize", this.onResize.bind(this), this.control);
     this.addEventListener("scroll", this.onScroll.bind(this), {
       passive: true,
       signal: this.control.signal,
     });
-    chatStore.addEventListener("load", this.onLoad.bind(this), this.control);
+    chatStore.addEventListener(
+      "load",
+      this.onChatLoad.bind(this) as any,
+      this.control,
+    );
     chatStore.addEventListener(
       "push",
       this.onChatPush.bind(this) as any,
@@ -59,10 +63,14 @@ export class ChatView extends HTMLElement {
       this.onChatPop.bind(this) as any,
       this.control,
     );
+    chatStore.loadChatMessages(this.chatId);
     GeneratorHandlesSubject.subscribe((handles) => {
       this.chatControl = handles[this.chatId];
       this.messageInput.stoppable = !!this.chatControl;
     }, this.control);
+    this.updateModel();
+    this.fullRender();
+    this.scrollToBottom();
   }
 
   disconnectedCallback() {
@@ -106,6 +114,13 @@ export class ChatView extends HTMLElement {
     this.atBottom = this.getScrollBottom() < 100;
   }
 
+  private onChatLoad({ chatId }: ChatLoadEvent) {
+    if (this.chatId !== chatId) return;
+    this.updateModel();
+    this.fullRender();
+    this.scrollToBottom();
+  }
+
   private previousScrollTop = this.scrollTop;
   private onScroll() {
     const delta = this.scrollTop - this.previousScrollTop;
@@ -116,12 +131,6 @@ export class ChatView extends HTMLElement {
 
   private onResize() {
     if (this.atBottom) this.scrollToBottom();
-  }
-
-  private onLoad() {
-    this.updateModel();
-    this.fullRender();
-    this.scrollToBottom();
   }
 
   private fullRender() {

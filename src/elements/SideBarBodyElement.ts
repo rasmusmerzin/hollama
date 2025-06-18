@@ -20,7 +20,7 @@ export class SideBarBodyElement extends HTMLElement {
     this.control = new AbortController();
     this.initialRender();
     chatStore.addEventListener(
-      "load",
+      "init",
       this.initialRender.bind(this),
       this.control,
     );
