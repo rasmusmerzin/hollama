@@ -30,7 +30,10 @@ export class ImageThumbnailElement extends HTMLElement {
       createElement("button", {
         className: "delete",
         innerHTML: ICON_CLOSE,
-        onclick: this.remove.bind(this),
+        onclick: (e) => {
+          e.stopPropagation();
+          this.remove();
+        },
       }),
     );
   }

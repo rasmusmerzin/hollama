@@ -10,6 +10,8 @@ export class ImageModal extends HTMLElement {
   private appWindow = getCurrentWindow();
   private imageElement: HTMLImageElement;
   private control?: AbortController;
+  private timeouts: any[] = [];
+  private removed = false;
 
   constructor() {
     super();
@@ -31,6 +33,7 @@ export class ImageModal extends HTMLElement {
   }
 
   connectedCallback() {
+    this.removed = false;
     this.control?.abort();
     this.control = new AbortController();
     this.imageElement.src = ImageModal.image;
@@ -44,10 +47,34 @@ export class ImageModal extends HTMLElement {
       () => this.appWindow.toggleMaximize(),
       this.control.signal,
     );
+    this.setAttribute("state", "opening");
+    this.timeouts.push(
+      setTimeout(() => {
+        this.removeAttribute("state");
+      }, 200),
+    );
   }
 
   disconnectedCallback() {
     this.control?.abort();
     delete this.control;
+    this.clearTimeouts();
+  }
+
+  remove() {
+    if (this.removed) return;
+    this.removed = true;
+    this.clearTimeouts();
+    this.setAttribute("state", "closing");
+    this.timeouts.push(
+      setTimeout(() => {
+        super.remove();
+        this.removeAttribute("state");
+      }, 200),
+    );
+  }
+
+  private clearTimeouts() {
+    this.timeouts.splice(0, this.timeouts.length).forEach(clearTimeout);
   }
 }

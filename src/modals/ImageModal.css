@@ -11,12 +11,12 @@ image-modal {
   align-items: center;
   -webkit-user-select: none;
   user-select: none;
-  img {
+  > img {
     max-width: calc(100% - 128px);
     max-height: calc(100% - 128px);
     border-radius: 14px;
   }
-  button.close {
+  > button.close {
     position: absolute;
     top: 6px;
     right: 6px;
@@ -33,5 +33,44 @@ image-modal {
       width: 20px;
       height: 20px;
     }
+  }
+}
+
+image-modal[state="opening"] {
+  animation: image-modal-background-in 200ms;
+  > img {
+    animation: image-modal-scale-in 200ms
+      cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+}
+
+image-modal[state="closing"] {
+  animation: image-modal-background-out 200ms forwards;
+  > img {
+    animation: image-modal-scale-out 200ms ease-in-out forwards;
+  }
+}
+
+@keyframes image-modal-background-in {
+  from {
+    background: #0000;
+  }
+}
+@keyframes image-modal-background-out {
+  to {
+    background: #0000;
+  }
+}
+
+@keyframes image-modal-scale-in {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+}
+@keyframes image-modal-scale-out {
+  to {
+    transform: scale(0);
+    opacity: 0;
   }
 }
