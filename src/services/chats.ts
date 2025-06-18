@@ -37,7 +37,6 @@ export function startChat({
         if (!chat) {
           chat = chatStore.createChat(title);
           chatStore.pushMessage(chat.id, inputMessage);
-          chatStore.lockChat(chat.id);
           trackGeneratorHandle(chat.id, control);
           resolve(chat);
         }
@@ -60,7 +59,6 @@ export function startChat({
       .catch(reject)
       .finally(() => {
         control.abort();
-        if (chat?.locked) chatStore.unlockChat(chat.id);
         reject();
       }),
   );
@@ -78,15 +76,15 @@ export async function continueChat({
   think?: boolean;
 }): Promise<void> {
   const chat = chatStore.getChat(chatId);
+  const messages = chatStore.messages.get(chatId) || [];
   if (!chat) return;
   let targetMessage: ChatMessage | undefined;
-  chatStore.lockChat(chat.id);
   const control = new AbortController();
   trackGeneratorHandle(chat.id, control);
   return new Promise((resolve, reject) =>
     generateChatMessage({
       model,
-      messages: [...chat.messages, inputMessage],
+      messages: [...messages, inputMessage],
       think,
       signal: control.signal,
       onok() {
@@ -114,7 +112,6 @@ export async function continueChat({
       .catch(reject)
       .finally(() => {
         control.abort();
-        if (chat.locked) chatStore.unlockChat(chat.id);
         reject();
       }),
   );

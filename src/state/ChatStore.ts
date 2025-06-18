@@ -2,6 +2,7 @@ import { Chat, ChatMessage, database } from "./database";
 
 export class ChatStore extends EventTarget {
   chats: Chat[] = [];
+  messages = new Map<string, ChatMessage[]>();
 
   constructor() {
     super();
@@ -13,10 +14,10 @@ export class ChatStore extends EventTarget {
   }
 
   getChatLastModel(chatId: string): string | undefined {
-    const chat = this.getChat(chatId);
-    if (!chat?.messages.length) return undefined;
-    for (let i = chat.messages.length - 1; i >= 0; i--) {
-      const message = chat.messages[i];
+    const messages = this.messages.get(chatId);
+    if (!messages?.length) return undefined;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const message = messages[i];
       if (message.model) return message.model;
     }
   }
@@ -25,7 +26,7 @@ export class ChatStore extends EventTarget {
     const id = crypto.randomUUID();
     const created = new Date().toISOString();
     const updated = created;
-    const chat: Chat = { id, title, created, updated, messages: [] };
+    const chat: Chat = { id, title, created, updated };
     this.chats.unshift(chat);
     database.then((db) => db.put("chats", chat));
     this.dispatchEvent(new ChatCreateEvent(chat));
@@ -36,7 +37,15 @@ export class ChatStore extends EventTarget {
     const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);
     if (chatIndex === -1) return false;
     const [chat] = this.chats.splice(chatIndex, 1);
-    database.then((db) => db.delete("chats", chatId));
+    const messages = this.messages.get(chatId);
+    this.messages.delete(chatId);
+    database.then((db) => {
+      const transaction = db.transaction(["chats", "messages"], "readwrite");
+      transaction.objectStore("chats").delete(chatId);
+      messages?.forEach((msg) =>
+        transaction.objectStore("messages").delete(msg.id),
+      );
+    });
     this.dispatchEvent(new ChatDeleteEvent(chat, chatIndex));
     return true;
   }
@@ -50,22 +59,6 @@ export class ChatStore extends EventTarget {
     this.moveChatToTop(chatId);
     database.then((db) => db.put("chats", chat));
     this.dispatchEvent(new ChatRenameEvent(chat));
-    return true;
-  }
-
-  lockChat(chatId: string): boolean {
-    const chat = this.getChat(chatId);
-    if (!chat || chat.locked) return false;
-    chat.locked = true;
-    this.dispatchEvent(new ChatLockEvent(chat));
-    return true;
-  }
-
-  unlockChat(chatId: string): boolean {
-    const chat = this.getChat(chatId);
-    if (!chat || !chat.locked) return false;
-    delete chat.locked;
-    this.dispatchEvent(new ChatUnlockEvent(chat));
     return true;
   }
 
@@ -91,6 +84,7 @@ export class ChatStore extends EventTarget {
     if (!updated) updated = created;
     const message: ChatMessage = {
       id,
+      chatId,
       role,
       model,
       content,
@@ -100,9 +94,15 @@ export class ChatStore extends EventTarget {
       updated,
     };
     chat.updated = new Date().toISOString();
-    chat.messages.push(message);
+    const messages = this.messages.get(chatId) || [];
+    messages.push(message);
+    this.messages.set(chatId, messages);
     this.moveChatToTop(chatId);
-    database.then((db) => db.put("chats", chat));
+    database.then((db) => {
+      const transaction = db.transaction(["chats", "messages"], "readwrite");
+      transaction.objectStore("chats").put(chat);
+      transaction.objectStore("messages").put(message);
+    });
     this.dispatchEvent(new ChatPushEvent(chat, message));
     return message;
   }
@@ -115,12 +115,17 @@ export class ChatStore extends EventTarget {
   ): ChatMessage | undefined {
     const chat = this.getChat(chatId);
     if (!chat) return undefined;
-    const message = chat.messages.find((msg) => msg.id === messageId);
+    const messages = this.messages.get(chatId);
+    const message = messages?.find((msg) => msg.id === messageId);
     if (!message) return undefined;
     message.content += content;
     if (thinking) message.thinking = (message.thinking || "") + thinking;
     message.updated = chat.updated = new Date().toISOString();
-    database.then((db) => db.put("chats", chat));
+    database.then((db) => {
+      const transaction = db.transaction(["chats", "messages"], "readwrite");
+      transaction.objectStore("chats").put(chat);
+      transaction.objectStore("messages").put(message);
+    });
     this.dispatchEvent(new ChatAppendEvent(chat, message));
     return message;
   }
@@ -128,11 +133,18 @@ export class ChatStore extends EventTarget {
   popMessage(chatId: string, messageId: string): ChatMessage | undefined {
     const chat = this.getChat(chatId);
     if (!chat) return undefined;
-    const fromIndex = chat.messages.findIndex((msg) => msg.id === messageId);
+    const messages = this.messages.get(chatId);
+    if (!messages?.length) return undefined;
+    const fromIndex = messages.findIndex((msg) => msg.id === messageId);
     if (fromIndex < 0) return undefined;
-    const [message] = chat.messages.splice(fromIndex, 1);
+    const [message] = messages.splice(fromIndex, 1);
+    if (!messages.length) this.messages.delete(chatId);
     chat.updated = new Date().toISOString();
-    database.then((db) => db.put("chats", chat));
+    database.then((db) => {
+      const transaction = db.transaction(["chats", "messages"], "readwrite");
+      transaction.objectStore("chats").put(chat);
+      transaction.objectStore("messages").delete(message.id);
+    });
     this.dispatchEvent(new ChatPopEvent(chat, message, fromIndex));
     return message;
   }
@@ -148,14 +160,19 @@ export class ChatStore extends EventTarget {
   private async laodFromDatabase() {
     const db = await database;
     const chats = await db.getAllFromIndex("chats", "updated");
-    this.dispatchEvent(
-      new ChatLoadEvent(
-        (this.chats = chats.reverse().map((chat) => {
-          delete chat.locked;
-          return chat;
-        })),
-      ),
-    );
+    this.chats = chats.reverse();
+    for (const chat of this.chats) {
+      const messages = await db.getAllFromIndex("messages", "chatId", chat.id);
+      this.messages.set(
+        chat.id,
+        messages.sort((a, b) => {
+          if (a.created < b.created) return -1;
+          if (a.created > b.created) return 1;
+          return 0;
+        }),
+      );
+    }
+    this.dispatchEvent(new ChatLoadEvent(this.chats));
   }
 }
 
@@ -185,18 +202,6 @@ export class ChatDeleteEvent extends Event {
     readonly fromIndex: number,
   ) {
     super("delete");
-  }
-}
-
-export class ChatLockEvent extends Event {
-  constructor(readonly chat: Chat) {
-    super("lock");
-  }
-}
-
-export class ChatUnlockEvent extends Event {
-  constructor(readonly chat: Chat) {
-    super("unlock");
   }
 }
 

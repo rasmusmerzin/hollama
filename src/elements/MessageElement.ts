@@ -1,5 +1,5 @@
 import "./MessageElement.css";
-import { Chat, ChatMessage } from "../state/database";
+import { ChatMessage } from "../state/database";
 import { ContextMenuElement } from "./ContextMenuElement";
 import { ICON_COPY } from "../icons";
 import { ImageThumbnailElement } from "./ImageThumbnailElement";
@@ -13,7 +13,6 @@ export class MessageElement extends HTMLElement {
   private thinkingElement: HTMLElement;
   private contentElement: HTMLElement;
 
-  chat?: Chat;
   #message?: ChatMessage;
   get message() {
     return this.#message;
@@ -115,9 +114,8 @@ export class MessageElement extends HTMLElement {
           {
             label: "Delete",
             action: () =>
-              this.chat &&
               this.message &&
-              chatStore.popMessage(this.chat.id, this.message.id),
+              chatStore.popMessage(this.message.chatId, this.message.id),
           },
         ],
       }),

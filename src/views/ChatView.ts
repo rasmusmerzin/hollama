@@ -1,31 +1,29 @@
 import "./ChatView.css";
-import { Chat } from "../state/database";
 import {
   ChatAppendEvent,
   ChatPopEvent,
   ChatPushEvent,
   chatStore,
 } from "../state/ChatStore";
+import { GeneratorHandlesSubject } from "../state/GeneratorHandlesSubject";
 import { InstalledModelsSubject } from "../state/ModelsSubject";
 import { MessageElement } from "../elements/MessageElement";
 import { MessageInputElement } from "../elements/MessageInputElement";
 import { SelectedModelSubject } from "../state/SelectedModelSubject";
 import { continueChat } from "../services/chats";
-import { GeneratorHandlesSubject } from "../state/GeneratorHandlesSubject";
 
 @tag("chat-view")
 export class ChatView extends HTMLElement {
   private bodyElement: HTMLElement;
   private messageInput: MessageInputElement;
   private chatId: string;
-  private chat?: Chat;
   private control?: AbortController;
   private chatControl?: AbortController;
   private atBottom = true;
 
   constructor({ chatId }: Record<string, string>) {
     super();
-    this.chat = chatStore.getChat((this.chatId = chatId));
+    this.chatId = chatId;
     this.replaceChildren(
       (this.bodyElement = createElement("div", { className: "body" })),
       (this.messageInput = createElement(MessageInputElement, {
@@ -59,16 +57,6 @@ export class ChatView extends HTMLElement {
     chatStore.addEventListener(
       "pop",
       this.onChatPop.bind(this) as any,
-      this.control,
-    );
-    chatStore.addEventListener(
-      "lock",
-      this.updateDisabled.bind(this),
-      this.control,
-    );
-    chatStore.addEventListener(
-      "unlock",
-      this.updateDisabled.bind(this),
       this.control,
     );
     GeneratorHandlesSubject.subscribe((handles) => {
@@ -130,18 +118,15 @@ export class ChatView extends HTMLElement {
   }
 
   private onLoad() {
-    if (!this.chat) this.chat = chatStore.getChat(this.chatId);
     this.updateModel();
-    this.updateDisabled();
     this.fullRender();
     this.scrollToBottom();
   }
 
   private fullRender() {
+    const messages = chatStore.messages.get(this.chatId) || [];
     this.bodyElement.replaceChildren(
-      ...(this.chat?.messages.map((message) =>
-        createElement(MessageElement, { chat: this.chat, message }),
-      ) || []),
+      ...messages.map((message) => createElement(MessageElement, { message })),
     );
   }
 
@@ -154,10 +139,6 @@ export class ChatView extends HTMLElement {
       )
     )
       SelectedModelSubject.next(model);
-  }
-
-  private updateDisabled() {
-    this.messageInput.disabled = !this.chat || this.chat.locked || false;
   }
 
   private getScrollBottom() {
