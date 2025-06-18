@@ -1,5 +1,6 @@
 import "./ImageThumbnailElement.css";
 import { ICON_CLOSE } from "../icons";
+import { ImageModal } from "../modals/ImageModal";
 
 @tag("image-thumbnail-element")
 export class ImageThumbnailElement extends HTMLElement {
@@ -21,6 +22,10 @@ export class ImageThumbnailElement extends HTMLElement {
 
   constructor() {
     super();
+    this.onclick = () => {
+      ImageModal.image = this.src;
+      history.pushState(history.state, "", location.hash + "#image");
+    };
     this.replaceChildren(
       createElement("button", {
         className: "delete",

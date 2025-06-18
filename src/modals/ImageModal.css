@@ -1,0 +1,37 @@
+image-modal {
+  z-index: 200;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #000c;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  -webkit-user-select: none;
+  user-select: none;
+  img {
+    max-width: calc(100% - 128px);
+    max-height: calc(100% - 128px);
+    border-radius: 14px;
+  }
+  button.close {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+    background: var(--background);
+    border-radius: 100%;
+    transform: scale(0.75);
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}

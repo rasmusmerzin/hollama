@@ -55,7 +55,7 @@ export class ModalWindowElement extends HTMLElement {
     );
     onDoubleClick(
       this,
-      () => !this.removed && this.appWindow.toggleMaximize(),
+      () => this.appWindow.toggleMaximize(),
       this.control.signal,
     );
     this.setAttribute("state", "opening");
@@ -88,7 +88,7 @@ export class ModalWindowElement extends HTMLElement {
   }
 
   private onMousedown(event: MouseEvent) {
-    if (event.button !== 0) return;
+    if (event.button) return;
     if (innerWidth < MODAL_WINDOW_BREAKPOINT)
       history.go(-1 - (history.state.modalIndex || 0));
     else this.appWindow.startDragging();

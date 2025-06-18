@@ -3,6 +3,7 @@ import "@merzin/element";
 import { AboutModal } from "./modals/AboutModal";
 import { AlertModal } from "./modals/AlertModal";
 import { ChatView } from "./views/ChatView";
+import { ImageModal } from "./modals/ImageModal";
 import { LandingView } from "./views/LandingView";
 import { ModelsModal } from "./modals/ModelsModal";
 import { PreferencesModal } from "./modals/PreferencesModal";
@@ -39,6 +40,7 @@ defineRoute("#preferences", PreferencesModal);
 defineRoute("#about", AboutModal);
 defineRoute("#models", ModelsModal);
 defineRoute("#alert", AlertModal);
+defineRoute("#image", ImageModal);
 
 startRouter({ viewRoot: main, modalRoot: root });
 
