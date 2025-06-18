@@ -44,6 +44,7 @@ export class SideBarEntryElement extends HTMLElement {
       (this.inputElement = createElement("input", {
         onfocus: this.onFocus.bind(this),
         onblur: this.onBlur.bind(this),
+        disabled: true,
       })),
       createElement("div", { className: "actions" }, [
         (this.menuButton = createElement("button", {
