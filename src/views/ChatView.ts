@@ -7,6 +7,7 @@ import {
   chatStore,
 } from "../state/ChatStore";
 import { GeneratorHandlesSubject } from "../state/GeneratorHandlesSubject";
+import { ICON_SPINNER } from "../icons";
 import { InstalledModelsSubject } from "../state/ModelsSubject";
 import { MessageElement } from "../elements/MessageElement";
 import { MessageInputElement } from "../elements/MessageInputElement";
@@ -26,7 +27,12 @@ export class ChatView extends HTMLElement {
     super();
     this.chatId = chatId;
     this.replaceChildren(
-      (this.bodyElement = createElement("div", { className: "body" })),
+      (this.bodyElement = createElement("div", { className: "body" }, [
+        createElement("div", {
+          className: "loading",
+          innerHTML: ICON_SPINNER,
+        }),
+      ])),
       (this.messageInput = createElement(MessageInputElement, {
         onsubmit: this.onSubmit.bind(this),
         onresize: this.onResize.bind(this),
@@ -134,7 +140,8 @@ export class ChatView extends HTMLElement {
   }
 
   private fullRender() {
-    const messages = chatStore.messages.get(this.chatId) || [];
+    const messages = chatStore.messages.get(this.chatId);
+    if (!messages) return;
     this.bodyElement.replaceChildren(
       ...messages.map((message) => createElement(MessageElement, { message })),
     );
