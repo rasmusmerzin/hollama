@@ -7,7 +7,7 @@ export function AlertModal() {
     {
       className: "alert",
       width: 360,
-      height: 180,
+      height: 100,
     },
     [
       createElement("h2", { innerText: "Notice" }),

@@ -87,7 +87,8 @@ export class ChatView extends HTMLElement {
   private async onSubmit() {
     const { message, think } = this.messageInput;
     const { chatId } = this;
-    const model = SelectedModelSubject.current()!;
+    const model = SelectedModelSubject.current();
+    if (!model) return alert("No model selected.");
     try {
       this.messageInput.loading = true;
       await continueChat({ chatId, model, message, think });

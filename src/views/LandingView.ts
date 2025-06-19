@@ -27,7 +27,8 @@ export class LandingView extends HTMLElement {
     this.chatControl?.abort();
     this.chatControl = new AbortController();
     const { message, think } = this.messageInput;
-    const model = SelectedModelSubject.current()!;
+    const model = SelectedModelSubject.current();
+    if (!model) return alert("No model selected.");
     try {
       this.messageInput.loading = true;
       const chat = await startChat({
