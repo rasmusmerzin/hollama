@@ -27,7 +27,13 @@ appWindow.onResized(async () => {
 });
 
 addEventListener("keydown", ({ key }) => {
-  if (key === "Escape") history.back();
+  const { activeElement } = document;
+  if (key === "Escape") {
+    if (activeElement instanceof HTMLInputElement) activeElement.blur();
+    else history.back();
+  } else if (key === "Enter") {
+    if (activeElement instanceof HTMLInputElement) activeElement.blur();
+  }
 });
 
 addEventListener("contextmenu", (event) => {

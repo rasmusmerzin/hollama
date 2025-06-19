@@ -85,6 +85,8 @@ svg {
 button:not(:disabled) {
   cursor: pointer;
   transition: filter 200ms;
+  -webkit-user-select: none;
+  user-select: none;
   &:hover {
     filter: brightness(0.9);
   }

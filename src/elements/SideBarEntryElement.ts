@@ -10,7 +10,6 @@ export class SideBarEntryElement extends HTMLElement {
   private inputElement: HTMLInputElement;
   private menuButton: HTMLButtonElement;
   private control?: AbortController;
-  private focusControl?: AbortController;
 
   #chat?: Chat;
   get chat() {
@@ -42,7 +41,6 @@ export class SideBarEntryElement extends HTMLElement {
     this.replaceChildren(
       createElement("div", { className: "icon", innerHTML: ICON_PLAY }),
       (this.inputElement = createElement("input", {
-        onfocus: this.onFocus.bind(this),
         onblur: this.onBlur.bind(this),
         disabled: true,
       })),
@@ -77,26 +75,9 @@ export class SideBarEntryElement extends HTMLElement {
   disconnectedCallback() {
     this.control?.abort();
     delete this.control;
-    this.focusControl?.abort();
-    delete this.focusControl;
-  }
-
-  private onFocus() {
-    this.focusControl?.abort();
-    this.focusControl = new AbortController();
-    addEventListener(
-      "keydown",
-      (event) => {
-        if (event.key === "Escape" || event.key === "Enter")
-          this.inputElement.blur();
-      },
-      this.focusControl,
-    );
   }
 
   private onBlur() {
-    this.focusControl?.abort();
-    delete this.focusControl;
     this.renaming = false;
     chatStore.renameChat(this.chat!.id, this.inputElement.value);
   }
