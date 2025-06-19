@@ -5,6 +5,9 @@ select-element {
   padding: 4px;
   cursor: pointer;
   white-space: nowrap;
+  &:not([has-options]) {
+    display: none;
+  }
   > .icon {
     width: 24px;
     height: 24px;

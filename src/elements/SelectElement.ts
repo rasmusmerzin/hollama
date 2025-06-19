@@ -54,6 +54,8 @@ export class SelectElement extends HTMLElement {
       this.#selected = null;
       this.dispatchEvent(new CustomEvent("change", { bubbles: true }));
     }
+    if (options.length) this.setAttribute("has-options", "");
+    else this.removeAttribute("has-options");
   }
 
   constructor() {
