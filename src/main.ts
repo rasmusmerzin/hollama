@@ -29,8 +29,12 @@ appWindow.onResized(async () => {
 addEventListener("keydown", ({ key }) => {
   const { activeElement } = document;
   if (key === "Escape") {
-    if (activeElement instanceof HTMLInputElement) activeElement.blur();
-    else history.back();
+    if (activeElement instanceof HTMLInputElement) {
+      activeElement.blur();
+      setTimeout(
+        () => document.activeElement == activeElement && history.back(),
+      );
+    } else history.back();
   } else if (key === "Enter") {
     if (activeElement instanceof HTMLInputElement) activeElement.blur();
   }
