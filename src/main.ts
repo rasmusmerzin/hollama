@@ -31,9 +31,9 @@ addEventListener("keydown", ({ key }) => {
   if (key === "Escape") {
     if (activeElement instanceof HTMLInputElement) {
       activeElement.blur();
-      setTimeout(
-        () => document.activeElement == activeElement && history.back(),
-      );
+      const check = () =>
+        document.activeElement == activeElement && history.back();
+      setTimeout(check, 1);
     } else history.back();
   } else if (key === "Enter") {
     if (activeElement instanceof HTMLInputElement) activeElement.blur();

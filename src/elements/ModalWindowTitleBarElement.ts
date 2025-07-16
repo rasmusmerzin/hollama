@@ -108,6 +108,10 @@ export class ModalWindowTitleBarElement extends HTMLElement {
     delete this.control;
   }
 
+  focusSearch() {
+    if (history.state.searching == null) this.toggleSearch();
+  }
+
   private toggleSearch() {
     if (history.state.searching != null) history.back();
     else {

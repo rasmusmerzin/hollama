@@ -59,6 +59,7 @@ export function ModelsModal() {
     onStateChange();
     ModelsSubject.subscribe(render, control);
     addEventListener("statechange", onStateChange, control);
+    addEventListener("keydown", onKeyDown, control);
   }
 
   function ondisconnect() {
@@ -74,6 +75,12 @@ export function ModelsModal() {
       syncModelDetails(submodal);
     }
     render();
+  }
+
+  function onKeyDown(event: KeyboardEvent) {
+    if (event.key.length !== 1) return;
+    if (ModelsSubject.current()[history.state.submodal]) return;
+    titleBar.focusSearch();
   }
 
   function render() {
@@ -156,8 +163,7 @@ export function ModelsModal() {
   }
 
   function renderDetails() {
-    const { submodal } = history.state;
-    const model = ModelsSubject.current()[submodal];
+    const model = ModelsSubject.current()[history.state.submodal];
     if (!model)
       return detailsBody.niche.replaceChildren(
         createElement("div", { className: "center" }, "Model not found."),
