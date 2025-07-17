@@ -28,7 +28,7 @@ You can download the latest version of Hollama from the [releases page](https://
 
 ### Development
 
-To run Hollama in a development environment, you'll need to have Node.js and Rust installed.
+To run Hollama in a development environment, check out [Tauri Prerequisites](https://tauri.app/start/prerequisites).
 
 1.  **Clone the repository:**
 
