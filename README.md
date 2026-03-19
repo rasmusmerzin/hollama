@@ -1,5 +1,7 @@
 # Hollama
 
+> Not built with LLMs. I just like emojies.
+
 Hollama is a sleek and intuitive desktop client for [Ollama](https://ollama.com), built with Tauri. It provides a beautiful and user-friendly interface for interacting with your favorite Ollama models, right from your desktop.
 
 ![Hollama Landing Screenshot](./screenshots/landing.light.png)
